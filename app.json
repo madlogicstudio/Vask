@@ -7,7 +7,7 @@
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro",
-      "publicPath": "/Vask/"
+      "publicPath": "./"
     },
 
     "experiments": {
