@@ -1,6 +1,6 @@
 import type React from "react"
 import { createUserWithEmailAndPassword, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
-import { auth, googleProvider } from "../firebase/FirebaseConfig";
+import { auth } from "../firebase/FirebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react"
 import Logo from "../assets/imgs/Logo.png"
