@@ -51,8 +51,8 @@ function SignInForm({setIsSignIn}: SignInFormProps) {
             .finally(() => {
                 setCheckingRedirect(false);
             });
-      }, [navigate]);
-      
+        }, [navigate]);
+        
         if (checkingRedirect) {
             return <div>Loading...</div>;
         }

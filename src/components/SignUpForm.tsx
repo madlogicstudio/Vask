@@ -22,7 +22,7 @@ function SignUpForm({setIsSignIn}: SignUpFormProps) {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [checked, setChecked] = useState(false);
-    const [checkingRedirect, setCheckingRedirect] = useState(true);
+    const [checkingRedirect, setCheckingRedirect] = useState(true); 
 
     const googleProviderInstance = new GoogleAuthProvider();
 
@@ -39,24 +39,25 @@ function SignUpForm({setIsSignIn}: SignUpFormProps) {
     }, []);
 
     useEffect(() => {
-        getRedirectResult(auth)
-            .then((result) => {
+        const handleRedirect = async () => {
+            try {
+                const result = await getRedirectResult(auth);
                 if (result?.user) {
-                console.log("Google redirect sign-up successful", result.user);
-                navigate("/dashboard");
+                    console.log("Google redirect sign-up successful", result.user);
+                    navigate("/dashboard");
                 }
-            })
-            .catch((error) => {
+            } catch (error) {
                 console.error("Redirect error:", error);
-            })
-            .finally(() => {
+            } finally {
                 setCheckingRedirect(false);
-            });
-        }, [navigate]);
-        
-        if (checkingRedirect) {
-            return <div>Loading...</div>; 
-        }
+            }
+        };
+        handleRedirect();
+    }, [navigate]);
+
+    if (checkingRedirect) {
+        return <div>Loading...</div>;
+    }
 
     const handleEmailSignUp = async () => {
         if (!email || !password) {
