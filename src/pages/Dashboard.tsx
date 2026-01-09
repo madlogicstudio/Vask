@@ -7,12 +7,12 @@ function Dashboard() {
     const [loading, setLoading] = useState(true);
   
     useEffect(() => {
-      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        setUser(currentUser);
-        setLoading(false);
-      });
-  
-      return () => unsubscribe();
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            setLoading(false);
+        });
+    
+        return () => unsubscribe();
     }, []);
   
     if (loading) {
@@ -20,7 +20,7 @@ function Dashboard() {
     }
   
     if (!user) {
-      return <div>Not logged in</div>;
+      return 
     }
   
     return (
