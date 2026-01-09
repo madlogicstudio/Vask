@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Landing from "./pages/Landing";
 import { useEffect, useState } from "react";
@@ -12,47 +12,43 @@ function AppWrapper() {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        setUser(currentUser);
+            if (currentUser) {
+                setUser(currentUser);
+            }
         });
 
         getRedirectResult(auth)
-        .then((result) => {
-            if (result?.user) {
-            console.log("Google redirect login success", result.user);
-            setUser(result.user); 
-            }
-        })
-        .catch(console.error)
-        .finally(() => setCheckingRedirect(false));
+            .then((result) => {
+                if (result?.user) {
+                    console.log("Google redirect login success", result.user);
+                    setUser(result.user);
+                }
+            })
+            .catch(console.error)
+            .finally(() => setCheckingRedirect(false));
 
         return unsubscribe;
     }, []);
 
     useEffect(() => {
         if (!checkingRedirect && user) {
-        navigate("/dashboard");
+            navigate("/dashboard");
         }
     }, [user, checkingRedirect, navigate]);
 
-    if (checkingRedirect) {
-        return <div>Loading...</div>;
-    }
-
-    if (user) {
-        return <div>Redirecting to dashboard...</div>;
-    }
-
+    if (checkingRedirect) return <div>Loading...</div>;
+    if (user) return <div>Redirecting to dashboard...</div>;
     return <Landing />;
 }
 
 function App() {
     return (
-        <HashRouter>
-        <AppWrapper />
-        <Routes>
-            <Route path="/dashboard" element={<Dashboard />} />
-        </Routes>
-        </HashRouter>
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<AppWrapper />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+            </Routes>
+        </BrowserRouter>
     );
 }
 
