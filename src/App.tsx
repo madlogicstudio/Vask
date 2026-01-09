@@ -8,30 +8,37 @@ import { auth } from "./firebase/FirebaseConfig";
 function AppWrapper() {
     const navigate = useNavigate();
     const [checkingRedirect, setCheckingRedirect] = useState(true);
+    const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                navigate("/dashboard"); 
-            }
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            if (currentUser) setUser(currentUser);
         });
 
         getRedirectResult(auth)
             .then((result) => {
                 if (result?.user) {
                     console.log("Redirect login success", result.user);
-                    navigate("/dashboard"); //
+                    setUser(result.user);
                 }
             })
             .catch(console.error)
             .finally(() => setCheckingRedirect(false));
 
         return unsubscribe;
-    }, [navigate]);
+    }, []);
+
+    useEffect(() => {
+        if (!checkingRedirect && user) {
+            navigate("/dashboard"); 
+        }
+    }, [user, checkingRedirect, navigate]);
 
     if (checkingRedirect) return <div>Loading...</div>;
 
-    return <Landing />; 
+    if (!user) return <Landing />;
+
+    return <div>Redirecting to dashboard...</div>;
 }
 
 export default function App() {
