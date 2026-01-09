@@ -43,7 +43,7 @@ function AppWrapper() {
 
 function App() {
     return (
-        <BrowserRouter>
+        <BrowserRouter basename="/Vask">
             <Routes>
                 <Route path="/" element={<AppWrapper />} />
                 <Route path="/dashboard" element={<Dashboard />} />
