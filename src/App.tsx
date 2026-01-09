@@ -2,14 +2,19 @@ import { HashRouter, Routes, Route, useNavigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Landing from "./pages/Landing";
 import { useEffect, useState } from "react";
-import { getRedirectResult } from "firebase/auth";
+import { getRedirectResult, onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase/FirebaseConfig";
 
 function AppWrapper() {
   const navigate = useNavigate();
   const [checkingRedirect, setCheckingRedirect] = useState(true);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+    });
+
     getRedirectResult(auth)
       .then((result) => {
         if (result?.user) {
@@ -19,22 +24,29 @@ function AppWrapper() {
       })
       .catch(console.error)
       .finally(() => setCheckingRedirect(false));
+
+    return unsubscribe;
   }, [navigate]);
 
   if (checkingRedirect) {
     return <div>Loading...</div>;
   }
 
-  return <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-  </Routes>;
+  if (user) {
+    navigate("/dashboard");
+    return <div>Redirecting to dashboard...</div>;
+  }
+
+  return <Landing />;
 }
 
 function App() {
   return (
     <HashRouter>
       <AppWrapper />
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
     </HashRouter>
   );
 }
