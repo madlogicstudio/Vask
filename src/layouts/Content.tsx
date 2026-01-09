@@ -1,7 +1,10 @@
 import { useIsMobile } from '../hooks/useIsMobile'
 import Parcel from '../assets/gif/Parcel.gif'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import UserAuth from '../components/UserAuth';
+import { getRedirectResult, onAuthStateChanged } from "firebase/auth";
+import { auth } from "../firebase/FirebaseConfig";
+import { useNavigate } from "react-router-dom";
 
 function Content() {
 
@@ -11,6 +14,33 @@ function Content() {
 
     const handleStart = () => {
         setIsStart(true);
+    }
+
+    const navigate = useNavigate();
+    const [checkingRedirect, setCheckingRedirect] = useState(true);
+
+    useEffect(() => {
+        getRedirectResult(auth)
+        .then((result) => {
+            if (result?.user) {
+            console.log("Google redirect login success", result.user);
+            navigate("/dashboard");
+            }
+        })
+        .catch(console.error)
+        .finally(() => setCheckingRedirect(false));
+
+        const unsub = onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log("User logged in:", user);
+        }
+        });
+
+        return unsub;
+    }, [navigate]);
+
+    if (checkingRedirect) {
+        return <div>Loading...</div>; 
     }
 
     return (
