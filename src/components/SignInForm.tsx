@@ -23,6 +23,7 @@ function SignInForm({setIsSignIn}: SignInFormProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [checkingRedirect, setCheckingRedirect] = useState(true);
 
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, (user) => {
@@ -38,16 +39,23 @@ function SignInForm({setIsSignIn}: SignInFormProps) {
 
     useEffect(() => {
         getRedirectResult(auth)
-        .then((result) => {
-            if (result && result.user) {
+            .then((result) => {
+                if (result && result.user) {
                 console.log("Google redirect sign-in successful", result.user);
                 navigate("/dashboard");
-            }
-        })
-        .catch((error) => {
-            console.error("Redirect error:", error);
-        });
-    }, [navigate]);
+                }
+            })
+            .catch((error) => {
+                console.error("Redirect error:", error);
+            })
+            .finally(() => {
+                setCheckingRedirect(false);
+            });
+      }, [navigate]);
+      
+        if (checkingRedirect) {
+            return <div>Loading...</div>;
+        }
 
     const handleEmailSignIn = async () => {
         try {

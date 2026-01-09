@@ -22,10 +22,10 @@ function SignUpForm({setIsSignIn}: SignUpFormProps) {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [checked, setChecked] = useState(false);
+    const [checkingRedirect, setCheckingRedirect] = useState(true);
 
     const googleProviderInstance = new GoogleAuthProvider();
 
-    // Handle auth state change
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -38,19 +38,25 @@ function SignUpForm({setIsSignIn}: SignUpFormProps) {
         return unsub;
     }, []);
 
-    // Handle redirect result (mobile Google sign-up)
     useEffect(() => {
         getRedirectResult(auth)
-        .then((result) => {
-            if (result && result.user) {
+            .then((result) => {
+                if (result?.user) {
                 console.log("Google redirect sign-up successful", result.user);
                 navigate("/dashboard");
-            }
-        })
-        .catch((error) => {
-            console.error("Redirect error:", error);
-        });
-    }, [navigate]);
+                }
+            })
+            .catch((error) => {
+                console.error("Redirect error:", error);
+            })
+            .finally(() => {
+                setCheckingRedirect(false);
+            });
+        }, [navigate]);
+        
+        if (checkingRedirect) {
+            return <div>Loading...</div>; 
+        }
 
     const handleEmailSignUp = async () => {
         if (!email || !password) {
@@ -76,10 +82,8 @@ function SignUpForm({setIsSignIn}: SignUpFormProps) {
     
     const handleGoogleSignUp = async () => {
         if (/Mobi|Android/i.test(navigator.userAgent)) {
-            // Mobile: use redirect
             signInWithRedirect(auth, googleProviderInstance);
         } else {
-            // Desktop: use popup
             signInWithPopup(auth, googleProviderInstance)
                 .then((result) => {
                     console.log("Google sign-up successful", result.user);
