@@ -25,7 +25,7 @@ function Features({ isDark } : ChangeTheme) {
                     <img src={Work} className='h-full w-w-full' alt="" />
                 </div>}
                 <span className={`${isDark? 'bg-[var(--dark-color)]' : 'bg-[var(--light-color)]'}
-                    flex-1 font-semibold text-[1rem] cursor-pointer`}>Vask combines real-time tracking, intelligent analytics, and automated reporting into a single, easy-to-use system, Vask simplifies fleet management while improving safety, efficiency, and cost control.</span>
+                    flex-1 font-semibold text-[1rem] z-1 cursor-pointer`}>Vask combines real-time tracking, intelligent analytics, and automated reporting into a single, easy-to-use system, Vask simplifies fleet management while improving safety, efficiency, and cost control.</span>
             </div>
             {!isMobile && <div className='h-full w-full flex flex-row items-center justify-center'>
                 <div className='flex flex-row items-center justify-center'>

@@ -17,7 +17,8 @@ function Footer({ isDark }: ChangeTheme) {
 
             <div className={`${isMobile? 'flex-col' : 'flex-row'}
                 h-auto w-full flex items-center justify-between gap-[1rem]`}>
-                <div className="h-auto w-[24rem] flex flex-col items-start justify-start">
+                <div className={`${isMobile? 'ml-[-1rem]' : ''}
+                    h-auto w-[24rem] flex flex-col items-start justify-start`}>
                     {!isMobile && <span className='font-semibold text-[1.2rem] cursor-pointer pl-[3rem]'>Created By</span>}
                     {isDark?  <img src={BannerDark} className="h-[12rem] w-[32rem] cursor-pointer" alt="" /> : 
                         <img src={BannerLight} className="h-[12rem] w-[32rem] cursor-pointer" alt="" />}
@@ -25,7 +26,8 @@ function Footer({ isDark }: ChangeTheme) {
                 <div className={`${isDark? 'border-[var(--light-color)]' : 'border-[var(--dark-color)]'}
                     ${isMobile? 'w-full flex-col border-t-2' : 'flex-row border-l-2'}
                     h-full flex-1 flex flex-col items-start justify-start`}>
-                    <ul className="p-[2rem] flex flex-col items-start justify-start gap-[1rem]">
+                    <ul className={`${isMobile? 'p-[0.5rem] pt-[1rem]' : 'p-[2rem]'}
+                        flex flex-col items-start justify-start gap-[1rem]`}>
                         <li className="cursor-pointer text-[1.2rem] font-bold">Vask</li>
                         <li className="hovered-light cursor-pointer text-[1rem] font-semibold">Documentation</li>
                         <li className="hovered-light cursor-pointer text-[1rem] font-semibold">Showcase</li>
@@ -35,7 +37,8 @@ function Footer({ isDark }: ChangeTheme) {
                 <div className={`${isDark? 'border-[var(--light-color)]' : 'border-[var(--dark-color)]'}
                     ${isMobile? 'w-full flex-col border-t-2' : 'flex-row border-l-2'}
                     h-full flex-1 flex flex-col items-start justify-start`}>
-                    <ul className="p-[2rem] flex flex-col items-start justify-start gap-[1rem]">
+                    <ul className={`${isMobile? 'p-[0.5rem] pt-[1rem]' : 'p-[2rem]'}
+                        flex flex-col items-start justify-start gap-[1rem]`}>
                         <li className="cursor-pointer text-[1.2rem] font-bold">Resources</li>
                         <li className="hovered-light cursor-pointer text-[1rem] font-semibold">Stories</li>
                         <li className="hovered-light cursor-pointer text-[1rem] font-semibold">Press room</li>
@@ -45,7 +48,8 @@ function Footer({ isDark }: ChangeTheme) {
                 <div className={`${isDark? 'border-[var(--light-color)]' : 'border-[var(--dark-color)]'}
                     ${isMobile? 'w-full flex-col border-t-2' : 'flex-row border-l-2'}
                     h-full flex-1 flex flex-col items-start justify-start`}>
-                    <ul className="p-[2rem] flex flex-col items-start justify-start gap-[1rem]">
+                    <ul className={`${isMobile? 'p-[0.5rem] pt-[1rem]' : 'p-[2rem]'}
+                        flex flex-col items-start justify-start gap-[1rem]`}>
                         <li className="cursor-pointer text-[1.2rem] font-bold">Our Team</li>
                         <li className="hovered-light cursor-pointer text-[1rem] font-semibold">About</li>
                         <li className="hovered-light cursor-pointer text-[1rem] font-semibold">Security</li>

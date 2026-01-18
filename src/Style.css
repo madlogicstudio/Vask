@@ -26,3 +26,26 @@
     background-color: var(--secondary-color);
     transition: 0.3s ease-in-out;
 }
+
+.slide-right{
+    animation: slide-right 0.5s ease forwards;
+}
+@keyframes slide-right {
+    from{
+        transform: translateX(-100%);
+    }
+    to{
+        transform: translateX(0%);
+    }
+}
+.slide-left{
+    animation: slide-left 0.5s ease forwards;
+}
+@keyframes slide-left {
+    from{
+        transform: translateX(0%);
+    }
+    to{
+        transform: translateX(-100%);
+    }
+}

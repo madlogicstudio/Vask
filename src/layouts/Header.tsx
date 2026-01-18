@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import Icon from '../assets/imgs/Icon.png'
 import WebIcon from '../assets/imgs/Web-icon.png'
-// import Laz from '../assets/imgs/Laz-icon.png'
 import { useIsMobile } from '../hooks/useIsMobile'
+import Sidenav from '../components/Sidenav';
 import AppModal from '../components/AppModal';
 
 type ChangeTheme = {
@@ -13,18 +13,19 @@ type ChangeTheme = {
 function Header({ isDark, setIsDark }: ChangeTheme) {
 
     const isMobile = useIsMobile();
+    const [isOpen, setIsOpen] = useState(false);
     const [isModal, setModal] = useState(false);
 
     return (
         <div className={`${isDark? "text-[var(--light-color)] bg-[var(--dark-color)] border-[var(--light-color)]" : "text-[var(--dark-color)] bg-[var(--light-color)] border-[var(--dark-color)]"}
-            ${isMobile? 'h-[4rem] p-[0.5rem]' : 'h-auto p-[1rem]'}
+            ${isMobile? 'h-[4rem] px-[0.5rem]' : 'h-auto px-[1rem] py-[0.5rem]'}
             w-full flex flex-row items-center justify-between gap-[1rem] border-b-2 fixed z-2`}>
             <div className="flex flex-row items-center justify-center gap-[0.5rem]">
-                {isMobile && <i title="Menu" className="fa-solid fa-bars cursor-pointer hovered-dark text-[1.5rem]"></i>}
+                {isMobile && <i title="Menu" className="fa-solid fa-bars cursor-pointer hovered-dark text-[1.5rem]"
+                onClick={() => setIsOpen((prev) => !prev)}></i>}
+                {isOpen && <Sidenav setIsOpen={setIsOpen} isDark={isDark} />}
                 {isDark? <img src={WebIcon} alt="" className='h-[3rem] w-[3rem] cursor-pointer'/> : <img src={Icon} alt="" className='h-[3rem] w-[3rem] cursor-pointer'/>}
                 <span className='font-bold text-[1.5rem] cursor-pointer'>Vask</span>
-                {/* <span className='font-semibold text-[1rem] cursor-pointer'>For</span>
-                <img src={Laz} alt="" className='h-[4rem] w-[4rem] ml-[-0.5rem] cursor-pointer'/> */}
             </div>
             {!isMobile && <div className="flex flex-row items-center justify-center gap-[1rem]">
                 <span className='font-semibold text-[1rem] cursor-pointer hovered-light'>Home</span>

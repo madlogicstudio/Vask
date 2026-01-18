@@ -18,9 +18,9 @@ function Content({ isDark }: ChangeTheme) {
   }, []);
 
   return (
-    <div className={`${isMobile? 'h-auto mt-[4rem] mb-[2rem] flex-col pt-[2rem]' : 'h-screen flex-row gap-[1rem] px-[2rem]'}
+    <div className={`${isMobile? 'h-auto mt-[4rem] mb-[2rem] flex-col pt-[1rem]' : 'h-screen flex-row gap-[1rem] px-[2rem]'}
         w-[96%] flex items-center justify-center relative`}>
-        <div className={`${isMobile? '' : 'flex-1'} flex flex-col items-start justify-center gap-[1rem]`}>
+        <div className={`${isMobile? '' : 'flex-1 gap-[1rem]'} flex flex-col items-start justify-center`}>
           <span className={`${isMobile? 'text-[2.2rem] text-center' : 'text-[3rem]'} font-bold cursor-pointer`}>Enhancing Vehicle Efficiency Through Digital Monitoring</span>
           {!isMobile && 
             <>
@@ -40,7 +40,7 @@ function Content({ isDark }: ChangeTheme) {
           }
         </div>
         <div className={`${isMobile? '' : 'flex-1'} flex flex-row items-center justify-center`}>
-          <img src={Bike} className={`${isMobile? 'h-[24rem] w-screen' : 'h-full w-full'}`} alt="" />
+          <img src={Bike} className={`${isMobile? 'h-[22rem] w-screen' : 'h-full w-full'}`} alt="" />
         </div>
         {isMobile && 
         <>
