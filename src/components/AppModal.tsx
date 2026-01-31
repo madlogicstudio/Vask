@@ -10,7 +10,7 @@ type ModalProps = {
 const AppModal = ({setModal} : ModalProps) => {
 
     return (
-        <div className="h-screen w-screen flex flex-col items-center justify-center bg-[rgba(0,0,0,0.5)] absolute top-0 left-0">
+        <div className="h-screen w-screen flex flex-col items-center justify-center bg-[rgba(0,0,0,0.8)] absolute top-0 left-0">
             <div className={`
                 relative h-[80%] w-[60%] flex flex-row items-center justify-center p-[2rem] bg-[var(--light-color)] rounded-xl rounded-tr-none`}>
                 <i onClick={() => setModal((prev) => !prev)} className="fa-solid fa-circle-xmark text-[2rem] text-[var(--dark-color)] 

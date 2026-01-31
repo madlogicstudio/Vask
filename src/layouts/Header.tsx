@@ -4,6 +4,7 @@ import WebIcon from '../assets/imgs/Web-icon.png'
 import { useIsMobile } from '../hooks/useIsMobile'
 import Sidenav from '../components/Sidenav';
 import AppModal from '../components/AppModal';
+import UserAuth from '../components/UserAuth';
 
 type ChangeTheme = {
     isDark: boolean;
@@ -15,6 +16,7 @@ function Header({ isDark, setIsDark }: ChangeTheme) {
     const isMobile = useIsMobile();
     const [isOpen, setIsOpen] = useState(false);
     const [isModal, setModal] = useState(false);
+    const [isAuth, setIsAuth] = useState(false);
 
     return (
         <div className={`${isDark? "text-[var(--light-color)] bg-[var(--dark-color)] border-[var(--light-color)]" : "text-[var(--dark-color)] bg-[var(--light-color)] border-[var(--dark-color)]"}
@@ -40,10 +42,12 @@ function Header({ isDark, setIsDark }: ChangeTheme) {
                 font-semibold text-[0.9rem] text-[var(--light-color)] px-[1rem] py-[0.5rem] cursor-pointer rounded-full hovered-button`}
                 onClick={() => setModal((prev) => !prev)}>Try our App</span>}
                 <span className={`${isDark? 'bg-[var(--highlight-color)]' : 'bg-[var(--highlight-color)]'}
-                font-semibold text-[0.9rem] text-[var(--light-color)] px-[1rem] py-[0.5rem] cursor-pointer rounded-full hovered-button`}>Sign In</span>
+                font-semibold text-[0.9rem] text-[var(--light-color)] px-[1rem] py-[0.5rem] cursor-pointer rounded-full hovered-button`}
+                onClick={() => setIsAuth((prev) => !prev)}>Sign In</span>
             </div>
 
             {isModal && <AppModal setModal={setModal}/>}
+            {isAuth && <UserAuth setIsAuth={setIsAuth} isDark={isDark} />}
         </div>
     )
 }

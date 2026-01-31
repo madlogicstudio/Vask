@@ -18,36 +18,27 @@ function Content({ isDark }: ChangeTheme) {
   }, []);
 
   return (
-    <div className={`${isMobile? 'h-auto mt-[4rem] mb-[2rem] flex-col pt-[1rem]' : 'h-screen flex-row gap-[1rem] px-[2rem]'}
+    <div className={`${isMobile? 'h-auto mt-[4rem] mb-[2rem] flex-col pt-[1rem]' : 'h-auto flex-col px-[4rem]'}
         w-[96%] flex items-center justify-center relative`}>
-        <div className={`${isMobile? '' : 'flex-1 gap-[1rem]'} flex flex-col items-start justify-center`}>
-          <span className={`${isMobile? 'text-[2.2rem] text-center' : 'text-[3rem]'} font-bold cursor-pointer`}>Enhancing Vehicle Efficiency Through Digital Monitoring</span>
-          {!isMobile && 
-            <>
-              <span className='font-semibold text-[1rem] cursor-pointer'>Lazada's smart and modern vehicle management system designed to make managing vehicles easier, faster, and more efficient.</span>
-              <span className={`${isDark? 'bg-[var(--primary-color)]' : 'bg-[var(--dark-color)]'}
-                font-semibold text-[1rem] text-[var(--light-color)] px-[1rem] py-[0.5rem] cursor-pointer rounded-full hovered-button`}>Get Started</span>
-              <div className='h-auto w-full flex flex-row items-start justify-between flex-wrap gap-[1rem] px-[2rem] mb-[2rem] absolute bottom-0 left-0'>
-                <i className='bx bx-quote-left text-[2rem] cursor-pointer'></i> 
-                <span className='font-bold text-[2rem] cursor-pointer'>Stay</span>
-                <span className='font-bold text-[2rem] cursor-pointer'>On</span>
-                <span className='font-bold text-[2rem] cursor-pointer'>Track</span>
-                <span className='font-bold text-[2rem] cursor-pointer'>With</span>
-                <span className='font-bold text-[2rem] cursor-pointer'>Vask</span>
-                <i className='bx bx-quote-right text-[2rem] cursor-pointer'></i> 
-              </div>
-            </>
-          }
-        </div>
-        <div className={`${isMobile? '' : 'flex-1'} flex flex-row items-center justify-center`}>
-          <img src={Bike} className={`${isMobile? 'h-[22rem] w-screen' : 'h-full w-full'}`} alt="" />
-        </div>
-        {isMobile && 
-        <>
-          <div className='flex flex-col items-center justify-center'>
-            <span className='font-semibold text-[1.2rem] cursor-pointer text-center'>Lazada's smart and modern vehicle management system designed to make managing vehicles easier, faster, and more efficient.</span>  
+
+        <div className={`${isMobile? 'flex-col px-[1rem]' : 'flex-row'}
+          w-full flex items-center justify-center`}>
+          <div className={`${isMobile? 'gap-[1rem]' : 'flex-1 gap-[1rem]'} w-full flex flex-col items-start justify-center`}>
+            <span className={`${isMobile? 'text-[2.2rem]' : 'text-[3rem]'} font-bold cursor-pointer`}>Enhancing Vehicle Efficiency Through Digital Monitoring</span>
+            {isMobile && <img src={Bike} className={`${isMobile? 'h-auto w-full' : 'h-full w-full'}`} alt="" />}
+            <span className={`${isMobile? '' : ''} font-semibold text-[1rem] cursor-pointer`}>Lazada's smart and modern vehicle management system designed to make managing vehicles easier, faster, and more efficient.</span>
+            <span className={`${isDark? 'bg-[var(--primary-color)]' : 'bg-[var(--dark-color)]'}
+              ${isMobile? 'mt-[1rem]' : 'mb-[2rem] mt-[1rem]'}
+              font-semibold text-[1rem] text-[var(--light-color)] px-[1rem] py-[0.5rem] cursor-pointer rounded-full hovered-button`}>Get Started</span>
           </div>
-          <div className='h-auto w-full flex flex-row items-start justify-between flex-wrap gap-[1rem] p-[1rem] mt-[1rem]'>
+          {!isMobile && <div className={`${isMobile? '' : 'flex-1'} flex flex-row items-start justify-start`}>
+            <img src={Bike} className={`${isMobile? 'h-full w-full' : 'h-full w-full'}`} alt="" />
+          </div>}
+        </div>
+
+        <div className={`${isMobile? '' : 'flex-1 gap-[1rem]'} w-full flex flex-col items-start justify-center`}>
+          
+          <div className={`${isMobile? 'mt-[2rem]' : 'mb-[2rem]'} h-auto w-full flex flex-row items-start justify-between flex-wrap gap-[1rem] px-[1rem]`}>
             <i className='bx bx-quote-left text-[2rem] cursor-pointer'></i> 
             <span className='font-bold text-[2rem] cursor-pointer'>Stay</span>
             <span className='font-bold text-[2rem] cursor-pointer'>On</span>
@@ -56,8 +47,8 @@ function Content({ isDark }: ChangeTheme) {
             <span className='font-bold text-[2rem] cursor-pointer'>Vask</span>
             <i className='bx bx-quote-right text-[2rem] cursor-pointer'></i> 
           </div>
-        </>
-        }
+        </div>
+        
     </div>
   )
 }
