@@ -63,7 +63,7 @@ function Footer({isDark}: FooterProps) {
             relative h-full w-full flex flex-col items-center justify-center gap-[calc(0.6vw+0.4rem)] py-[calc(0.6vw+0.4rem)] pb-0 rounded-lg rounded-b-none`}>
             
             <div ref={navRef} className={`${isMobile? "flex-col" : "flex-row"}
-                flex-2 max-w-[1280px] w-full flex items-satrt justify-center gap-[calc(0.6vw+0.4rem)] pt-[calc(0.6vw+0.4rem)]`}>
+                flex-2 w-full flex items-satrt justify-center gap-[calc(0.6vw+0.4rem)] pt-[calc(0.6vw+0.4rem)]`}>
             
                 <div className={`${isMobile? "gap-[calc(1.2vw+0.8rem)]" : ""}
                     h-full flex-2 flex flex-col items-start justify-between p-[calc(0.6vw+0.4rem)]`}>

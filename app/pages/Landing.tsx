@@ -73,13 +73,14 @@ function Landing({isDark, setIsDark}: LandingProps) {
                 <Cta isDark={isDark}/>
             </div>
             <div className={`${isDark ? "text-[var(--light-color)] bg-[var(--dark-color)]" : "bg-[var(--light-color)] text-[var(--dark-color)]"}
-                h-auto w-full flex flex-col items-center justify-center z-[5] p-[calc(0.6vw+0.4rem)] pb-0`}>
+                ${isMobile? "mt-[1rem]" : "p-[calc(0.6vw+0.4rem)]"}
+                h-auto w-full flex flex-col items-center justify-center z-[5] pb-0`}>
                 <Footer isDark={isDark}/>
             </div>
             
-            {/* {isVisible && <div className="h-screen w-full flex flex-col items-center justify-end fixed top-0 left-0 z-10">
+            {isVisible && <div className="h-screen w-full flex flex-col items-center justify-end fixed top-0 left-0 z-10">
                 <Cookie isDark={isDark} setIsVisible={setIsVisible}/>
-            </div>} */}
+            </div>}
         </div>
     )
 }

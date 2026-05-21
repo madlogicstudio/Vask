@@ -1,4 +1,6 @@
+'use client'
 
+import { useIsMobile } from "../hooks/useIsMobile"
 
 type CookieProps = {
     isDark: boolean;
@@ -6,15 +8,21 @@ type CookieProps = {
 }
 
 const Cookie = ({isDark, setIsVisible}: CookieProps) => {
+
+    const isMobile = useIsMobile();
+
     return (
         <div className={`${isDark ? "text-[var(--light-color)] bg-[var(--dark-color)]" : "bg-[var(--light-color)] text-[var(--dark-color)]"}
-            h-auto w-full flex flex-col items-start justify-start p-[calc(0.6vw+0.4rem)] fadeIn`}>
+            ${isMobile? "p-[calc(0.6vw+0.4rem)]" : ""}
+            h-auto w-full flex flex-col items-start justify-start  fadeIn`}>
             
-            <div className="w-full flex flex-row items-center justify-between gap-[calc(0.6vw+0.4rem)]">
+            <div className={`${isMobile? "flex-col" : "flex-row items-center justify-between"}
+                w-full flex gap-[calc(0.6vw+0.4rem)]`}>
                 <span className='text-[length:var(--medium-font)] font-semibold cursor-pointer transition duration-300 ease-in-out'>
                     We value your privacy
                 </span>
-                <div className="flex flex-row items-center justify-center gap-[0.5em]">
+                <div className={`${isMobile? "justify-start py-[calc(0.6vw+0.4rem)]" : "justify-center"}
+                    flex items-center gap-[0.5em]`}>
                     <span className="px-[calc(0.6vw+0.4rem)] py-[calc(0.4vw+0.3rem)] text-[length:var(--small-font)] rounded-full text-white bg-black cursor-pointer
                         hover:text-[color:var(--purple-color)] hover:bg-gray-300 transition duration-300 ease-in-out"
                         onClick={() => setIsVisible(false)}>
@@ -27,7 +35,8 @@ const Cookie = ({isDark, setIsVisible}: CookieProps) => {
                     </span>
                 </div>
             </div>
-            <div className="w-full flex flex-row items-center justify-start gap-[calc(0.4vw+0.3rem)]">
+            <div className={`${isMobile? "flex-col items-start" : "flex-row items-center"}
+                w-full flex justify-start gap-[calc(0.4vw+0.3rem)]`}>
                 <span className='text-[length:var(--small-font)] cursor-pointer transition duration-300 ease-in-out'>
                     This website uses cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. 
                     By clicking "Accept all" you consent to our use of cookies.
