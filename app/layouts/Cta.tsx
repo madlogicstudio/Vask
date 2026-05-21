@@ -59,7 +59,7 @@ const Cta = ({isDark}: CtaProps) => {
             </div>
             <div ref={titleRef2} className={`${isMobile? "p-[calc(0.6vw+0.4rem)]" : ""}
                 w-full flex flex-row items-center justify-between gap-[calc(0.6vw+0.4rem)]`}>
-                <span className='anek text-[length:var(--large-font)] leading-[1.1] hovered cursor-pointer'>
+                <span className='anek text-[length:var(--medium-font)] leading-[1.1] hovered cursor-pointer'>
                     Transform the way you manage vehicles, drivers, and daily operations with Vask — a smart and modern fleet 
                     management platform built for speed, efficiency, and scalability.
                 </span>
@@ -98,7 +98,7 @@ const Cta = ({isDark}: CtaProps) => {
                         rounded-full p-[0.3em] cursor-pointer">
                         <i className="bx bx-send-alt-2 p-[0.6em] bg-[var(--primary-color)] text-[color:var(--light-color)] 
                             text-[length:var(--medium-font)] rounded-full" />
-                        <span className='text-[color:var(--light-color)] pr-[0.6em] text-[length:var(--medium-font)] cursor-pointer'>
+                        <span className='text-[color:var(--light-color)] pr-[0.6em] text-[length:var(--small-font)] cursor-pointer'>
                             Subscribe
                         </span>
                     </div>
@@ -120,7 +120,7 @@ const Cta = ({isDark}: CtaProps) => {
                         <span className='anek text-[length:var(--hero-font)] font-bold leading-[1.3] hovered cursor-pointer'>
                             Start Your Vask Journey Today
                         </span>
-                        <span className='anek text-[length:var(--large-font)] leading-[1.3] hovered cursor-pointer'>
+                        <span className='anek text-[length:var(--medium-font)] leading-[1.3] hovered cursor-pointer'>
                             Join us towards smarter fleet management with real-time insights, better 
                             operational visibility, and data-driven decision making powered by Vask.
                         </span>
