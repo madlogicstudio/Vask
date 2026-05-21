@@ -50,16 +50,16 @@ const FeatureCard = ({display, title, text, isDark}: FeatureCardProps) => {
                 </div>
 
                 {/* Back Side */}
-                <div className={`${isDark? "bg-[color:var(--blue-color)]" : "bg-[color:var(--primary-color)]"}
-                    absolute inset-0 rotate-y-180 backface-hidden rounded-lg text-white flex flex-col items-center justify-center p-8`}>
+                <div className={`${isDark? "bg-[color:var(--blue-color)]" : "bg-[color:var(--primary-color)] p-8"}
+                    absolute inset-0 rotate-y-180 backface-hidden rounded-lg text-white flex flex-col items-center justify-center`}>
                     
-                    <h2 className={`${isMobile? "text-[length:var(--emdium-font)]" : "text-[length:var(--large-font)]"}
+                    <h2 className={`${isMobile? "text-[length:var(--medium-font)]" : "text-[length:var(--large-font)]"}
                         font-bold mb-4 text-center`}>
                         {title}
                     </h2>
 
                     <p className={`${isMobile? "text-[length:var(--small-font)]" : "text-[length:var(--small-font)]"}
-                        text-[length:var(--medium-font)] text-center leading-relaxed`}>
+                        anek text-center leading-relaxed`}>
                         {text}
                     </p>
 
