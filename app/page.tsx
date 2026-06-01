@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from "react"
-import Landing from "./pages/Landing";
-import { useIsMobile } from "./hooks/useIsMobile";
+import Landing from "./home/pages/Landing";
+import { useIsMobile } from "./home/hooks/useIsMobile";
 
 function page() {
 

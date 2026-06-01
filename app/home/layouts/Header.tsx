@@ -7,6 +7,7 @@ import { Brand } from '../components/Brand'
 import { Track } from '../components/Track'
 import { useGSAP } from '../hooks/useGSAP'
 import gsap from 'gsap'
+import { useRouter } from "next/navigation";
 
 type HeaderProps = {
     isDark: boolean;
@@ -17,6 +18,7 @@ function Header({isDark, setIsDark} : HeaderProps) {
 
     const [isHover, setIsHover] = useState("");
     const isMobile = useIsMobile();
+    const router = useRouter();
 
     const headerRef = useRef<HTMLDivElement>(null);
     const trackRef = useRef<HTMLDivElement>(null);
@@ -55,7 +57,7 @@ function Header({isDark, setIsDark} : HeaderProps) {
             ${isMobile? "" : ""}
             w-full flex flex-col items-center fixed top-0 left-0 z-50 gap-[calc(0.6vw+0.4rem)] transition-all duration-300 overflow-hidden`}>
             
-            <div className={`w-full flex flex-row items-center justify-between px-[calc(0.6vw+0.4rem)] px-[calc(0.4vw+0.3rem)]`}>
+            <div className={`w-full flex flex-row items-center justify-between px-[calc(0.6vw+0.4rem)]`}>
 
                 <Brand isDark={isDark} />
                 
@@ -102,10 +104,12 @@ function Header({isDark, setIsDark} : HeaderProps) {
                     </span>
                 </div>
                 <div className='flex justify-center'>
-                    <span className={`text-[length:var(--small-font)]
+                    <span 
+                        className={`text-[length:var(--small-font)]
                         cursor-pointer transition duration-300 ease-in-out hovered`}
                         onMouseEnter={() => setIsHover("Signin")}
                         onMouseLeave={() => setIsHover("")}
+                        onClick={() => router.push('/home/signin')}
                         >
                         {isHover === "Signin" ? "[ Sign in ]" : "Sign in"}
                     </span>
