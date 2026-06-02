@@ -55,7 +55,7 @@ function Header({isDark, setIsDark} : HeaderProps) {
     return (
         <div id='header' ref={headerRef} className={`${isDark ? "text-[var(--light-color)] bg-[var(--dark-color)]" : "bg-[var(--light-color)] text-[var(--dark-color)]"}
             ${isMobile? "" : ""}
-            w-full flex flex-col items-center fixed top-0 left-0 z-50 gap-[calc(0.6vw+0.4rem)] transition-all duration-300 overflow-hidden`}>
+            w-full flex flex-col items-center fixed top-0 left-0 z-10 gap-[calc(0.6vw+0.4rem)] transition-all duration-300 overflow-hidden`}>
             
             <div className={`w-full flex flex-row items-center justify-between px-[calc(0.6vw+0.4rem)]`}>
 

@@ -78,7 +78,7 @@ function Landing({isDark, setIsDark}: LandingProps) {
                 <Footer isDark={isDark}/>
             </div>
             
-            {isVisible && <div className="h-screen w-full flex flex-col items-center justify-end fixed top-0 left-0 z-10">
+            {isVisible && <div className="h-screen w-full flex flex-col items-center justify-end fixed top-0 left-0 z-20 bg-[rgba(0,0,0,0.3)] bordered">
                 <Cookie isDark={isDark} setIsVisible={setIsVisible}/>
             </div>}
         </div>

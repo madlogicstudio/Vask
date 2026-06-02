@@ -63,7 +63,7 @@ function Footer({isDark}: FooterProps) {
             relative h-full w-full flex flex-col items-center justify-center gap-[calc(0.6vw+0.4rem)] py-[calc(0.6vw+0.4rem)] pb-0 rounded-lg rounded-b-none`}>
             
             <div ref={navRef} className={`${isMobile? "flex-col" : "flex-row"}
-                flex-2 w-full flex items-satrt justify-center gap-[calc(0.6vw+0.4rem)] pt-[calc(0.6vw+0.4rem)]`}>
+                flex-2 w-full max-w-[1280px] flex items-satrt justify-center gap-[calc(0.6vw+0.4rem)] pt-[calc(0.6vw+0.4rem)]`}>
             
                 <div className={`${isMobile? "gap-[calc(1.2vw+0.8rem)]" : ""}
                     h-full flex-2 flex flex-col items-start justify-between p-[calc(0.6vw+0.4rem)]`}>
@@ -85,17 +85,8 @@ function Footer({isDark}: FooterProps) {
 
                     </div>
 
-                    <div className={`${isMobile? "justify-center" : "justify-start"}
-                        w-full flex flex-row items-start gap-[calc(0.6vw+0.4rem)]`}>
-                        <i className="bxl bx-facebook-circle bx-tada-hover text-[length:var(--logo-size)] hovered cursor-pointer" />
-                        <i className="bxl bx-instagram bx-tada-hover text-[length:var(--logo-size)] hovered cursor-pointer" />
-                        <i className="bxl bx-bluesky bx-tada-hover text-[length:var(--logo-size)] hovered cursor-pointer" />
-                        <i className="bxl bx-github bx-tada-hover text-[length:var(--logo-size)] hovered cursor-pointer" />
-                        <i className="bxl bx-vercel bx-tada-hover text-[length:var(--logo-size)] hovered cursor-pointer" />
-                    </div>
-
-                    <div className={`${isMobile? "flex-col justify-center" : "flex-row justify-start"}
-                        h-auto w-full flex items-center`}>
+                    <div className={`${isMobile? "w-full flex-col justify-center items-center" : "flex-col justify-start items-start"}
+                        h-auto w-full flex`}>
                         <span className='text-[length:var(--medium-font)] text-[color:var(--dark-color)]  font-bold hovered cursor-pointer'>
                             Designed & Created By
                         </span>
@@ -104,7 +95,7 @@ function Footer({isDark}: FooterProps) {
 
                 </div>
 
-                <div className="h-full flex-1 flex flex-col items-center justify-start">
+                <div className="flex-1 flex flex-col items-center justify-start">
 
                     <div className={`${isMobile? "items-center" : "items-start"}
                         h-full w-full flex flex-col justify-between p-[calc(0.6vw+0.4rem)]`}>
@@ -131,6 +122,15 @@ function Footer({isDark}: FooterProps) {
                             </span>
                         </div>
 
+                    </div>
+
+                    <div className={`${isMobile? "justify-center" : "justify-start"}
+                        w-full flex flex-row items-start gap-[calc(0.6vw+0.4rem)]`}>
+                        <i className="bxl bx-facebook-circle bx-tada-hover text-[length:var(--logo-size)] hovered cursor-pointer" />
+                        <i className="bxl bx-instagram bx-tada-hover text-[length:var(--logo-size)] hovered cursor-pointer" />
+                        <i className="bxl bx-bluesky bx-tada-hover text-[length:var(--logo-size)] hovered cursor-pointer" />
+                        <i className="bxl bx-github bx-tada-hover text-[length:var(--logo-size)] hovered cursor-pointer" />
+                        <i className="bxl bx-vercel bx-tada-hover text-[length:var(--logo-size)] hovered cursor-pointer" />
                     </div>
 
                 </div>

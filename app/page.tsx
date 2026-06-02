@@ -2,12 +2,16 @@
 
 import { useState, useEffect } from "react"
 import Landing from "./home/pages/Landing";
-import { useIsMobile } from "./home/hooks/useIsMobile";
+import Dashboard from "./dashboard/page"
+
+export type User = {
+  uid: string;
+  email: string | null;
+}
 
 function page() {
 
   const [isDark, setIsDark] = useState(false);
-  const isMobile = useIsMobile();
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -16,7 +20,24 @@ function page() {
     }, 2000)
 
     return () => clearTimeout(timer)
-  }, [])
+  }, []);
+
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const storedUser = sessionStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  if (user) {
+
+    return(
+      <Dashboard isDark={isDark}/>
+    )
+
+  }
 
   if (loading) {
     return (
