@@ -44,7 +44,7 @@ function page() {
 
     return (
         <div className={`${isDark? "bg-[var(--dark-color)] text-[var(--light-color)]" : "bg-[var(--light-color)] text-[var(--dark-color)]"}
-            relative h-auto w-full flex flex-col items-center justify-center`}>
+            relative h-auto w-full flex flex-col items-center justify-center pt-[calc(0.6vw+0.4rem)]`}>
             
             <div className={`h-full w-full flex flex-row items-center justify-between px-[calc(0.6vw+0.4rem)]`}>
 
@@ -68,7 +68,7 @@ function page() {
                 
             </div>
 
-            <div className={`${isMobile? "h-auto mt-[1rem]" : "h-screen mt-[2rem]"}
+            <div className={`${isMobile? "h-auto my-[2rem] p-[calc(0.6vw+0.4rem)]" : "h-screen mt-[2rem]"}
                 w-full max-w-[1200px] flex flex-col items-center justify-center gap-[calc(0.6vw+0.4rem)]`}> 
 
                 <span className={`${isDark? "text-[color:var(--light-color)]" : "text-[color:var(--primary-color)]"} 
@@ -77,17 +77,17 @@ function page() {
                     We’ve sent a verification link to your email
                 </span>
 
-                <div className="w-full flex flex-row items-center justify-center gap-[calc(0.3vw+0.2rem)]">
+                <div className="w-full flex flex-col items-center justify-center gap-[calc(0.3vw+0.2rem)]">
                     <span className={`${isDark? "text-[var(--light-color)]" : "text-[var(--dark-color)]"}
-                        text-[length:var(--extrasmall-font)] font-normal text-[var(--dark-color)] text-center`}>
+                        text-[length:var(--small-font)] font-normal text-[var(--dark-color)] text-center`}>
                         Please check your inbox (and spam folder) to continue.
                     </span>
                     <span className={`${isDark? "text-[var(--light-color)]" : "text-[var(--dark-color)]"}
-                        text-[length:var(--extrasmall-font)] font-normal text-[var(--dark-color)] text-center`}>
+                        text-[length:var(--small-font)] font-normal text-[var(--dark-color)] text-center`}>
                         Didn't receive a verification link? 
                     </span>
                     <span className={`${isDark? "text-[var(--pink-color)]" : "text-[var(--pink-color)]"}
-                        text-[length:var(--extrasmall-font)] font-normal text-[var(--dark-color) ] text-center cursor-pointer hovered`}
+                        text-[length:var(--small-font)] font-normal text-[var(--dark-color) ] text-center cursor-pointer hovered`}
                         onClick={() => {
                             resendEmail()
                         }}>
@@ -108,8 +108,8 @@ function page() {
                 </div>}
 
                 <span className={`${isDark? "bg-[var(--primary-color)]" : "bg-[var(--secondary-color)]"}
-                    p-[calc(0.4vw+0.6rem)] text-[calc(0.4vw+0.6rem)] bg-[var(--dark-color)] text-[var(--light-color)] cursor-pointer
-                    transition 300 ease-in-out`}
+                    p-[calc(0.4vw+0.6rem)] text-[length:var(--small-font)] bg-[var(--dark-color)] text-[var(--light-color)] cursor-pointer
+                    transition 300 ease-in-out `}
                     onClick={() => {
                         checkVerification()
                     }}>I’ve verified my email</span> 

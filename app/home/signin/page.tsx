@@ -102,7 +102,7 @@ function page() {
     return (
         <div className={`${isDark ? "text-[var(--light-color)] bg-[var(--dark-color)]" : "bg-[var(--light-color)] text-[var(--dark-color)]"}
             ${isMobile? "" : ""}
-            h-auto w-full flex flex-col items-center justify-start fadeIn pt-[calc(0.4vw+0.3rem)] px-[calc(0.6vw+0.4rem)]`}>
+            h-auto w-full flex flex-col items-center justify-start fadeIn pt-[calc(0.4vw+0.3rem)]`}>
 
             <div className={`h-full w-full flex flex-row items-center justify-between px-[calc(0.6vw+0.4rem)]`}>
 
@@ -126,7 +126,7 @@ function page() {
                 
             </div>
 
-            {!isSignup && <div className={`${isMobile? "h-screen flex-col my-4" : "h-screen flex-row p-[calc(0.6vw+0.4rem)]"}
+            {!isSignup && <div className={`${isMobile? "h-screen flex-col my-4 px-[calc(0.6vw+0.4rem)]" : "h-screen flex-row p-[calc(0.6vw+0.4rem)]"}
                 w-full max-w-[1280px] flex items-center justify-between`}>
 
                 <div className={`flex-1 h-full flex flex-col items-center justify-center gap-[calc(0.6vw+0.4rem)] p-[calc(0.6vw+0.4rem)]`}>
@@ -193,7 +193,7 @@ function page() {
 
             </div>}
 
-            {isSignup && <div className={`${isMobile? "h-screen flex-col my-4" : "h-screen flex-row p-[calc(0.6vw+0.4rem)]"}
+            {isSignup && <div className={`${isMobile? "h-screen flex-col my-4 px-[calc(0.6vw+0.4rem)]" : "h-screen flex-row p-[calc(0.6vw+0.4rem)]"}
                 w-full max-w-[1280px] flex items-center justify-between`}>
 
                 {!isMobile && <div className={`flex-1 h-full flex flex-col items-center justify-center gap-[calc(0.6vw+0.4rem)] p-[calc(0.6vw+0.4rem)]`}>
