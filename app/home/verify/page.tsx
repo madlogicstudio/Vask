@@ -9,13 +9,27 @@ import OTP from "../assets/Successful.png"
 import { sendEmailVerification } from "firebase/auth";
 import { auth } from "../firebase/FirebaseConfig";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import type { User } from '@/app/page';
+import Error from '../assets/404.png'
+import NotVerified from '../assets/Error.png'
 
 function page() {
 
-    const [isDark, setIsDark] = useState(false);
+    const [isDark, setIsDark] = useState(true);
     const isMobile = useIsMobile();
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
+    const [user, setUser] = useState<User | null>(null);
+    const [notVerified, setNotVerified] = useState(false);
+
+    useEffect(() => {
+        const storedUser = sessionStorage.getItem("user");
+
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+    }, []);
 
     const resendEmail = async () => {
         if (auth.currentUser) {
@@ -33,18 +47,67 @@ function page() {
             await user.reload(); 
 
             if (user.emailVerified) {
-                router.push('/');
+                setLoading(true);
+                setTimeout(() => {
+                    router.push('/dashboard');
+                }, 3000);
+                
             } else {
-                alert("Email not verified yet. Please check your inbox.");
+                setNotVerified(true);
             }
         } catch (error) {
             console.error(error);
         }
     };
 
-    return (
+    if(loading){
+        return(
+            <div className={`w-screen h-screen flex flex-col items-center justify-center bg-white gap-[calc(0.6vw+0.4rem)]`}>
+
+                <div className={`h-[360px] w-[360px] md:h-[600px] md:w-[600px]
+                    flex flex-col items-center justify-center`}>
+                <video autoPlay muted loop playsInline className="h-full w-full object-contain">
+                    <source src="/Catronaut.mp4" type="video/mp4" />
+                </video>
+                </div>
+                <div className={`w-16 h-16 md:w-24 md:h-24
+                border-4 border-[var(--primary-color)] border-t-transparent rounded-full animate-spin`}></div>
+                
+            </div>
+        )
+    }
+
+    if(user?.uid) return (
         <div className={`${isDark? "bg-[var(--dark-color)] text-[var(--light-color)]" : "bg-[var(--light-color)] text-[var(--dark-color)]"}
             relative h-auto w-full flex flex-col items-center justify-center pt-[calc(0.6vw+0.4rem)]`}>
+
+            {notVerified && 
+                <div className={`z-10 fadeIn h-screen w-full flex flex-col items-center justify-center px-[calc(0.6vw+0.4rem)] absolute top-0 left-0 bg-[rgba(0,0,0,0.5)]`}>
+                    
+                    <div className={`${isMobile? "h-[480px] w-full px-[calc(0.6vw+0.4rem)]" : "h-[680px] w-[680px] p-[calc(0.6vw+0.4rem)]"}
+                        relative flex flex-col items-center justify-center bg-[var(--light-color)] rounded-lg rounded-tr-none`}>
+
+                        <i className={`${isMobile? "text-[length:var(--medium-font)] top-[-8px] right-[-8px]" : "text-[length:var(--extrasmall-font)] top-[-16px] right-[-16px]"}
+                            bx bx-x p-[calc(0.4vw+0.3rem)] rounded-full bg-[var(--primary-color)] text-[var(--light-color)] cursor-pointer absolute`} 
+                            onClick={() => {
+                                setNotVerified(false);
+
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 1000);
+                            }}/>
+
+                        <img src={NotVerified.src} className='h-[480px] h-[480px] object-contain' alt="" />
+
+                        <span className={`${isMobile? "text-[length:var(--title-font)] mb-[2rem]" : "text-[length:var(--medium-font)]"}
+                            poppins font-semibold cursor-pointer transition duration-300 ease-in-out text-[var(--dark-color)] text-center hovered`}>
+                            Not Verified Yet.
+                        </span>
+
+                    </div>
+
+                </div>
+            }
             
             <div className={`h-full w-full flex flex-row items-center justify-between px-[calc(0.6vw+0.4rem)]`}>
 
@@ -68,7 +131,7 @@ function page() {
                 
             </div>
 
-            <div className={`${isMobile? "h-auto my-[2rem] p-[calc(0.6vw+0.4rem)]" : "h-screen mt-[2rem]"}
+            <div className={`${isMobile? "h-auto my-[2rem] p-[calc(0.6vw+0.4rem)]" : "h-auto mt-[2rem]"}
                 w-full max-w-[1200px] flex flex-col items-center justify-center gap-[calc(0.6vw+0.4rem)]`}> 
 
                 <span className={`${isDark? "text-[color:var(--light-color)]" : "text-[color:var(--primary-color)]"} 
@@ -77,7 +140,8 @@ function page() {
                     We’ve sent a verification link to your email
                 </span>
 
-                <div className="w-full flex flex-col items-center justify-center gap-[calc(0.3vw+0.2rem)]">
+                <div className={`${isMobile? "flex-col" : "flex-row"}
+                    w-full flex items-center justify-center gap-[calc(0.3vw+0.2rem)]`}>
                     <span className={`${isDark? "text-[var(--light-color)]" : "text-[var(--dark-color)]"}
                         text-[length:var(--small-font)] font-normal text-[var(--dark-color)] text-center`}>
                         Please check your inbox (and spam folder) to continue.
@@ -117,6 +181,21 @@ function page() {
             </div>
 
             <Footer isDark={isDark} />
+        </div>
+    )
+
+    return(
+        <div className={`${isDark ? "text-[var(--light-color)] bg-[var(--dark-color)]" : "bg-[var(--light-color)] text-[var(--dark-color)]"}
+            h-screen flex flex-col items-center justify-center scroll-smooth`}>
+            
+            <img src={Error.src} className={`${isMobile? "h-[420px] w-[420px]" : "h-[620px] w-[620px]"}`} alt="" />
+
+            <span className={`${isDark ? "text-[var(--dark-color)] bg-[var(--light-color)]" : "bg-[var(--dark-color)] text-[var(--light-color)]"}
+                ${isMobile? "w-[320px] p-[calc(0.6vw+0.4rem)]" : "w-[480px] px-[calc(0.6vw+0.4rem)] py-[calc(0.4vw+0.3rem)]"}
+                cursor-pointer rounded-full text-center`}
+                onClick={() => router.push('/')}>
+                Go back
+            </span>
         </div>
     )
 }

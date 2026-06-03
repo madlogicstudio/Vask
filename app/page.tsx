@@ -11,7 +11,7 @@ export type User = {
 
 function page() {
 
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -34,7 +34,7 @@ function page() {
   if (user) {
 
     return(
-      <Dashboard isDark={isDark}/>
+      <Dashboard isDark={isDark} />
     )
 
   }

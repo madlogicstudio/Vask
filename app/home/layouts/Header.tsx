@@ -99,7 +99,7 @@ function Header({isDark, setIsDark} : HeaderProps) {
                         cursor-pointer transition duration-300 ease-in-out hovered`}
                         onMouseEnter={() => setIsHover("Github")}
                         onMouseLeave={() => setIsHover("")}
-                        >
+                        onClick={() => window.open('https://github.com/madlogicstudio/Vask')}>
                         {isHover === "Github" ? "[ Github ]" : "Github"}
                     </span>
                 </div>
