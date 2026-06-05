@@ -19,18 +19,30 @@
   --icon-size: clamp(1rem, 0.6vw + 0.4rem, 1rem);
   --logo-size: clamp(2rem, 1.6vw + 1.4rem, 3rem);
 
-  --pink-color: #EA7B7B;
   --red-color: #D25353;
   --maroon-color: #9E3B3B;
   --white-color: #E5E7DF;
-  --blue-color: #576A8F;
   --purple-color: #555879;
 
+  /*main colors*/
   --primary-color: #455A64;
   --secondary-color: #597683;
+  --blue-color: #576A8F;
+  --pink-color: #EA7B7B;
 
+  /*dashboard colors */
+  --dashboard-dark: #141414;
+  --dashboard-primary: #333333;
+  --dashboard-secondary: #777777;
+  --dashboard-light: #ededed;
+
+  /*accent colors*/
+  --dashboard-white: #D6D6D6;
+
+  /*landing colors*/
   --light-color: #ededed;
   --dark-color: #141215;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);

@@ -79,7 +79,7 @@ function page() {
 
     if(user?.uid) return (
         <div className={`${isDark? "bg-[var(--dark-color)] text-[var(--light-color)]" : "bg-[var(--light-color)] text-[var(--dark-color)]"}
-            relative h-auto w-full flex flex-col items-center justify-center pt-[calc(0.6vw+0.4rem)]`}>
+            relative w-full flex flex-col items-center justify-center pt-[calc(0.6vw+0.4rem)]`}>
 
             {notVerified && 
                 <div className={`z-10 fadeIn h-screen w-full flex flex-col items-center justify-center px-[calc(0.6vw+0.4rem)] absolute top-0 left-0 bg-[rgba(0,0,0,0.5)]`}>
@@ -131,7 +131,7 @@ function page() {
                 
             </div>
 
-            <div className={`${isMobile? "h-auto my-[2rem] p-[calc(0.6vw+0.4rem)]" : "h-auto mt-[2rem]"}
+            <div className={`${isMobile? "h-auto my-[2rem] p-[calc(0.6vw+0.4rem)]" : "h-screen mt-[2rem]"}
                 w-full max-w-[1200px] flex flex-col items-center justify-center gap-[calc(0.6vw+0.4rem)]`}> 
 
                 <span className={`${isDark? "text-[color:var(--light-color)]" : "text-[color:var(--primary-color)]"} 

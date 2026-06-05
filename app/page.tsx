@@ -34,7 +34,7 @@ function page() {
   if (user) {
 
     return(
-      <Dashboard isDark={isDark} />
+      <Dashboard />
     )
 
   }
