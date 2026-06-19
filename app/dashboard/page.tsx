@@ -8,6 +8,26 @@ import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import DashboardCard from "./components/DashboardCard"
 import LiveStatus from "./components/LiveStatus"
+import { CreateHub } from "./components/CreateHub"
+import { db } from "../home/firebase/FirebaseConfig";
+import { collection, getDocs, addDoc } from "firebase/firestore";
+import { CreateChat } from "./components/CreateChat"
+import ReportsTab from "./components/ReportsTab"
+import { HistoryTab } from "./components/HistoryTab"
+import { DriverTab } from "./components/DriverTab"
+
+type InTransitData = {
+  id: string;
+  deliveryData: {
+    pickupAdress: string;
+    deliveryId: string;
+    dropoffAddress: string;
+    distance: number;
+    time: any;
+    driverName: string;
+    driverId: string;
+  };
+};
 
 function page() {
 
@@ -15,7 +35,19 @@ function page() {
   const [isDark, setIsDark] = useState(true);
   const isMobile = useIsMobile();
   const router = useRouter();
-  const [isHue, setIsHue] = useState(false);
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [hubName, setHubName] = useState("");
+  const [hubId, setHubId] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [inTransitData, setInTransitData] = useState<InTransitData[]>([]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false)
+    }, 2000)
+
+    return () => clearTimeout(timer)
+  }, []);
 
   useEffect(() => {
     const storedUser = sessionStorage.getItem("user");
@@ -25,64 +57,205 @@ function page() {
     }
   }, []);
 
+  //fetch hubs
+  useEffect(() => {
+    const fetchHubs = async () => {
+      const uid = user?.uid;
+      if (!uid) return;
+
+      try {
+          const snap = await getDocs(
+              collection(db, "operators", uid, "hubs")
+          );
+
+          const hubs = snap.docs.map(doc => ({
+              id: doc.id,
+                ...(doc.data() as { hubName: string; createdAt?: any })
+
+          }));
+
+          console.log("Hubs:", hubs);
+
+          //set first hub as active 
+          if (hubs.length > 0) {
+              setHubName(hubs[0].hubName);
+              console.log("Hub: ", hubName);
+          }
+
+          setHubId(hubs[0].id);
+
+          const deliveries = snap.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data(),
+          }));
+
+          console.log(deliveries);
+          // setInTransitData(deliveries);
+
+      } catch (error) {
+          console.error("Error fetching hubs:", error);
+      }
+    };
+    fetchHubs();
+  }, [user]);
+
   useEffect(() => {
     console.log(
       `Logged user: Id:${user?.uid}, Email:${user?.email}`
     )
   }, [user]);
 
+  //fetchDrivers
+  const [driverIds, setDriverIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchDrivers = async () => {
+      if (!user?.uid) return;
+
+      try {
+        const snap = await getDocs(
+          collection(db, "operators", user.uid, "drivers")
+        );
+
+        const ids = snap.docs.map(doc => doc.id);
+
+        setDriverIds(ids);
+
+        console.log("Driver IDs:", driverIds);
+      } catch (error) {
+        console.error("Error fetching drivers:", error);
+      }
+    };
+
+    fetchDrivers();
+  }, [user]);
+
+  //fetchIntransits
+  
+    useEffect(() => {
+      const fetchInTransits = async () => {
+          if (!user?.uid || !hubId) return;
+
+          try {
+              const snap = await getDocs(
+                  collection(
+                      db,
+                      "operators",
+                      user.uid,
+                      "hubs",
+                      hubId,
+                      "inTransit"
+                  )
+              );
+
+              const deliveries = snap.docs.map(doc => ({
+                  id: doc.id,
+                  ...doc.data(),
+              })) as InTransitData[];
+
+              console.log("InTransit Data:", deliveries);
+
+              setInTransitData(deliveries);
+
+          } catch (error) {
+              console.error("Error fetching inTransit collection:", error);
+          }
+      };
+
+      fetchInTransits();
+  }, [user, hubId]);
+
+
+  if (loading) {
+    return (
+      <div className={`w-screen h-screen flex flex-col items-center justify-center bg-white gap-[calc(0.6vw+0.4rem)]`}>
+
+        <div className={`h-[360px] w-[360px] md:h-[600px] md:w-[600px]
+            flex flex-col items-center justify-center`}>
+          <video autoPlay muted loop playsInline className="h-full w-full object-contain">
+            <source src="Catronaut.mp4" type="video/mp4" />
+          </video>
+        </div>
+        <div className={`w-16 h-16 md:w-24 md:h-24
+          border-4 border-[var(--primary-color)] border-t-transparent rounded-full animate-spin`}></div>
+        
+      </div>
+    )
+  }
+
   if(user?.uid) return (
     <div className={`${isDark ? "text-[var(--light-color)] bg-[var(--dashboard-primary)]" : "bg-[var(--dashboard-light)] text-[var(--dark-color)]"}
         h-screen flex flex-col items-start justify-start scroll-smooth p-[calc(0.6vw+0.4rem)]`}>
-        
-        {/* colors used */}
-        {isHue && <div className={`h-screen w-full flex flex-col items-center justify-center scroll-smooth gap-[calc(0.6vw+0.4rem)]
-          bg-white text-[var(--dark-color)]`}>
-
-          <span className={`${isMobile? "w-[320px] p-[calc(0.6vw+0.4rem)]" : "w-[480px] px-[calc(0.6vw+0.4rem)] py-[calc(0.4vw+0.3rem)]"} 
-            text-[length:var(--small-font)] font-semibold text-center`}>
-            Dashboard Palette
-          </span>
-
-          <div className="flex flex-row items-center justify-center gap-[calc(0.6vw+0.4rem)]">
-            <div title="#141414" className="flex flex-col items-center justify-center bg-[var(--dashboard-dark)] rounded-lg p-12 cursor-pointer"></div>
-            <div title="#333333" className="flex flex-col items-center justify-center bg-[var(--dashboard-primary)] rounded-lg p-12 cursor-pointer"></div>
-            <div title="#777777" className="flex flex-col items-center justify-center bg-[var(--dashboard-secondary)] rounded-lg p-12 cursor-pointer"></div>
-            <div title="#ededed" className="flex flex-col items-center justify-center bg-[var(--dashboard-light)] rounded-lg p-12 cursor-pointer"></div>
-          </div>
-
-          <div className="flex flex-row items-center justify-center gap-[calc(0.6vw+0.4rem)]">
-            <div title="#455A64" className="flex flex-col items-center justify-center bg-[var(--primary-color)] rounded-lg p-12 cursor-pointer"></div>
-            <div title="#597683" className="flex flex-col items-center justify-center bg-[var(--secondary-color)] rounded-lg p-12 cursor-pointer"></div>
-            <div title="#576A8F" className="flex flex-col items-center justify-center bg-[var(--blue-color)] rounded-lg p-12 cursor-pointer"></div>
-            <div title="#EA7B7B" className="flex flex-col items-center justify-center bg-[var(--pink-color)] rounded-lg p-12 cursor-pointer"></div>
-          </div>
-
-        </div>}
+  
 
         {/* dashboard */}
 
-        {!isHue && <div className="h-full w-full flex flex-row items-center justify-center gap-3">
+        <div className="h-full w-full flex flex-row items-center justify-center gap-3">
 
-          <SideNav isDark={isDark} setIsDark={setIsDark}/>
+          <SideNav isDark={isDark} setIsDark={setIsDark} setActiveTab={setActiveTab} hubName={hubName} setHubName={setHubName}/>
 
-          <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
-            flex-1 h-full w-full flex flex-col items-center justify-start rounded-lg overflow-y-scroll`}>
+          {activeTab == "dashboard" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
+            ${isMobile? "overflow-y-scroll hide-scrollbar" : ""}
+            flex-1 h-full w-full flex flex-col items-center justify-start rounded-lg`}>
+
+            {!hubName && <CreateHub />}
             
-            <div className="w-full flex flex-row items-center justify-center gap-3 p-3 flex-wrap">
+            {hubName && <div className="w-full flex flex-row items-center justify-center gap-3 p-3 flex-wrap">
               <DashboardCard isDark={isDark} title={"Total Shipments"} count={"12,345"} trend={"up"} percent={"32%"} icon="cube"/>
               <DashboardCard isDark={isDark} title={"On-Time Delivery"} count={"94.2%"} trend={"up"} percent={"0.5%"} icon="check-circle"/>
               <DashboardCard isDark={isDark} title={"Active Alerts"} count={"23"} trend={"down"} percent={"0.8%"} icon="alert-triangle"/>
               <DashboardCard isDark={isDark} title={"Avg. Transit Time"} count={"3.2d"} trend={"up"} percent={"0.8%"} icon="clock-5"/>
-            </div>
+            </div>}
             
-            <div className="h-full w-full flex flex-row items-center justify-center gap-3 p-3">
-              <LiveStatus isDark={isDark} />
-            </div>
+            {hubName && <div className="h-full w-full flex flex-row items-center justify-center gap-3 p-3">
+              <LiveStatus isDark={isDark} inTransitData={inTransitData}/>
+            </div>}
             
-          </div>
+          </div>}
 
-        </div>}
+          {activeTab == "history" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
+            flex-1 h-full w-full flex flex-col items-center justify-center rounded-lg overflow-y-scroll`}>
+
+            <HistoryTab isDark={isDark} activeTab={activeTab}/>
+            
+          </div>}
+
+          {activeTab == "drivers" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
+            flex-1 h-full w-full flex flex-col items-center justify-center rounded-lg overflow-y-scroll`}>
+
+            <DriverTab isDark={isDark} activeTab={activeTab}/>
+            
+          </div>}
+
+          {activeTab == "reports" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
+            flex-1 h-full w-full flex flex-col items-center justify-center rounded-lg`}>
+
+            <ReportsTab isDark={isDark} activeTab={activeTab} />
+
+          </div>}
+
+          {activeTab == "analytics" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
+            flex-1 h-full w-full flex flex-col items-center justify-center rounded-lg overflow-y-scroll`}>
+
+            Analytics Tab
+            
+          </div>}
+
+          {activeTab == "chat" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
+            flex-1 h-full w-full flex flex-col items-center justify-center rounded-lg`}>
+
+            <CreateChat isDark={isDark} hubName={hubName} />
+
+          </div>}
+
+          {activeTab == "settings" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
+            flex-1 h-full w-full flex flex-col items-center justify-center rounded-lg overflow-y-scroll`}>
+
+            Settings Tab
+            
+          </div>}
+
+        </div>
 
     </div>
   )

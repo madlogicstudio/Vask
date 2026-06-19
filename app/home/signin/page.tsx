@@ -5,7 +5,7 @@ import { Brand } from '../components/Brand';
 import { Theme } from '../components/Theme';
 import lightIcon from '../assets/Icon.png'
 import darkIcon from '../assets/Dark-icon.png'
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Footer from '../layouts/Footer';
 import Signin from '../assets/Signin.png'
@@ -13,7 +13,7 @@ import Signup from '../assets/Signup.png'
 import { auth } from "../firebase/FirebaseConfig";
 import { signInWithEmailAndPassword ,sendEmailVerification, createUserWithEmailAndPassword } from "firebase/auth";
 import { db } from "../firebase/FirebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
+import { addDoc, doc, setDoc, collection } from "firebase/firestore";
 import Successful from '../assets/Successful.png'
 import Error from '../assets/Error.png'
 
@@ -89,12 +89,51 @@ function page() {
 
             sessionStorage.setItem("user", JSON.stringify(newUser));
 
-            await setDoc(doc(db, "operators", userCredential.user.uid), {
-                email: newUser.email,
-                createdAt: new Date(),
-            });
+            const firebaseUser = userCredential.user;
 
-            await sendEmailVerification(userCredential.user);
+            const newFirebaseUser = async () => {
+                try {
+
+                    await setDoc(
+                        doc(db, "operators", firebaseUser.uid),
+                        {
+                            uid: firebaseUser.uid,
+                            email: firebaseUser.email,
+                            createdAt: new Date()
+                        }
+                    );
+
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+
+            newFirebaseUser();
+
+            const createChat = async () => {
+            
+                if (!firebaseUser) return;
+        
+                try {
+        
+                    const chatRef = await addDoc(
+                        collection(db, "operators", firebaseUser.uid, "chats"),
+                        {
+                            ownerId: firebaseUser.uid,
+                            createdAt: new Date()
+                        }
+                    );
+        
+                    console.log("Chat created:", chatRef.id);
+        
+                } catch (error) {
+                    console.error(error);
+                }
+            };
+            
+            await createChat();
+        
+            await sendEmailVerification(firebaseUser);
 
             setSuccessSignup(true);
         } catch (error: any) {
