@@ -15,6 +15,7 @@ import { CreateChat } from "./components/CreateChat"
 import ReportsTab from "./components/ReportsTab"
 import { HistoryTab } from "./components/HistoryTab"
 import { DriverTab } from "./components/DriverTab"
+import { AnalyticsTab } from "./components/AnalyticsTab"
 
 type InTransitData = {
   id: string;
@@ -165,6 +166,179 @@ function page() {
       fetchInTransits();
   }, [user, hubId]);
 
+  //driverCount
+  const [driverCount, setDriverCount] = useState(0);
+
+  const fetchDriverCount = async () => {
+    if (!user || !hubId) return;
+
+    try {
+      const colRef = collection(
+        db,
+        "operators",
+        user.uid,
+        "hubs",
+        hubId,
+        "drivers"
+      );
+
+      const snapshot = await getDocs(colRef);
+
+      setDriverCount(snapshot.size);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDriverCount();
+  }, [user, hubId]);
+
+  //totalDelivered
+  const [deliveredCount, setDeliveredCount] = useState(0);
+
+  const fetchDeliveredCount = async () => {
+    if (!user || !hubId) return;
+
+    try {
+      const colRef = collection(
+        db,
+        "operators",
+        user.uid,
+        "hubs",
+        hubId,
+        "completed"
+      );
+
+      const snapshot = await getDocs(colRef);
+
+      setDeliveredCount(snapshot.size);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDeliveredCount();
+  }, [user, hubId]);
+
+  //getAverageDeliveryTime
+  const [avgDeliveryTime, setAvgDeliveryTime] = useState(0);
+
+  const fetchAverageDeliveryTime = async () => {
+    if (!user || !hubId) return;
+
+    try {
+      const colRef = collection(
+        db,
+        "operators",
+        user.uid,
+        "hubs",
+        hubId,
+        "completed"
+      );
+
+      const snapshot = await getDocs(colRef);
+
+      let totalDuration = 0;
+      let validDeliveries = 0;
+
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+
+        if (data.time && data.completedAt) {
+          const start = data.time.toDate(); 
+          const end = data.completedAt.toDate();
+
+          const durationMs = end.getTime() - start.getTime();
+
+          totalDuration += durationMs;
+          validDeliveries++;
+        }
+      });
+
+      if (validDeliveries > 0) {
+        const averageMs = totalDuration / validDeliveries;
+
+        // convert to minutes
+        const averageMinutes = averageMs / (1000 * 60);
+
+        setAvgDeliveryTime(averageMinutes);
+      } else {
+        setAvgDeliveryTime(0);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAverageDeliveryTime();
+  }, [user, hubId]);
+
+  //convertAvgDeliveryTime
+  const formatDeliveryTime = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = Math.round(minutes % 60);
+
+    if (hours > 0) {
+      return `${hours}h ${mins}m`;
+    }
+
+    return `${mins}m`;
+  };
+
+  //combineBothLogs
+  const [pending, setPending] = useState<any[]>([]);
+
+  //getBothLogs
+  const fetchPendingIssues = async () => {
+    if (!user || !hubId) return;
+
+    try {
+      const maintenanceSnap = await getDocs(
+        collection(
+          db,
+          "operators",
+          user.uid,
+          "hubs",
+          hubId,
+          "maintenance"
+        )
+      );
+
+      const fuelSnap = await getDocs(
+        collection(
+          db,
+          "operators",
+          user.uid,
+          "hubs",
+          hubId,
+          "fuelLog"
+        )
+      );
+
+      const maintenance = maintenanceSnap.docs.map(doc => ({
+        id: doc.id,
+        type: "maintenance",
+        ...doc.data()
+      }));
+
+      const fuel = fuelSnap.docs.map(doc => ({
+        id: doc.id,
+        type: "fuel",
+        ...doc.data()
+      }));
+
+      setPending([...maintenance, ...fuel]);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPendingIssues();
+  }, [user, hubId]);
 
   if (loading) {
     return (
@@ -187,7 +361,6 @@ function page() {
     <div className={`${isDark ? "text-[var(--light-color)] bg-[var(--dashboard-primary)]" : "bg-[var(--dashboard-light)] text-[var(--dark-color)]"}
         h-screen flex flex-col items-start justify-start scroll-smooth p-[calc(0.6vw+0.4rem)]`}>
   
-
         {/* dashboard */}
 
         <div className="h-full w-full flex flex-row items-center justify-center gap-3">
@@ -201,10 +374,14 @@ function page() {
             {!hubName && <CreateHub />}
             
             {hubName && <div className="w-full flex flex-row items-center justify-center gap-3 p-3 flex-wrap">
-              <DashboardCard isDark={isDark} title={"Total Shipments"} count={"12,345"} trend={"up"} percent={"32%"} icon="cube"/>
-              <DashboardCard isDark={isDark} title={"On-Time Delivery"} count={"94.2%"} trend={"up"} percent={"0.5%"} icon="check-circle"/>
-              <DashboardCard isDark={isDark} title={"Active Alerts"} count={"23"} trend={"down"} percent={"0.8%"} icon="alert-triangle"/>
-              <DashboardCard isDark={isDark} title={"Avg. Transit Time"} count={"3.2d"} trend={"up"} percent={"0.8%"} icon="clock-5"/>
+              <DashboardCard isDark={isDark} title={"Total Drivers"} count={driverCount} icon="car"/>
+              <DashboardCard isDark={isDark} title={"Total Delivered"} count={deliveredCount} icon="package"/>
+              <DashboardCard isDark={isDark} title={"Avg. Delivery Time"} count={
+                <>
+                  {formatDeliveryTime(avgDeliveryTime)}
+                </>
+              } icon="clock-dashed-half"/>
+              <DashboardCard isDark={isDark} title={"Pending Issues"} count={pending.length} icon="alert-triangle"/>
             </div>}
             
             {hubName && <div className="h-full w-full flex flex-row items-center justify-center gap-3 p-3">
@@ -237,7 +414,7 @@ function page() {
           {activeTab == "analytics" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
             flex-1 h-full w-full flex flex-col items-center justify-center rounded-lg overflow-y-scroll`}>
 
-            Analytics Tab
+            <AnalyticsTab isDark={isDark} activeTab={activeTab} totalDrivers={driverCount} totalDelivered={deliveredCount} avgDeliveryTime={formatDeliveryTime(avgDeliveryTime)} pending={pending.length} />
             
           </div>}
 
