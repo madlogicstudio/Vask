@@ -2,6 +2,7 @@
 
 import { TrendingDown } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useIsMobile } from "@/app/home/hooks/useIsMobile";
 
 type DashboardCardProps = { 
     isDark: boolean;
@@ -12,15 +13,18 @@ type DashboardCardProps = {
 
 const DashboardCard = ({isDark, title, count, icon}: DashboardCardProps) => {
 
+    const isMobile = useIsMobile();
+
     return (
         <div className={`${isDark? "bg-[var(--dashboard-primary)]" : "bg-[var(--dashboard-light)]"}
-            h-auto flex-1 flex flex-row items-start justify-center rounded-lg p-6`}>
+            ${isMobile? "h-[120px] flex-1 p-3" : "h-auto flex-1 p-6"}
+            flex flex-row items-start justify-center rounded-lg`}>
 
-            <div className="flex-1 h-full flex flex-col items-start justify-center">
-                <span className="poppins text-md">
+            <div className={`${isMobile? "h-full justify-between" : "justify-center"} flex-1 h-full flex flex-col items-start`}>
+                <span className={`${isMobile? "text-sm max-w-[100px]" : "text-md"} poppins `}>
                     {title}
                 </span>
-                <span className="text-5xl font-bold py-3">
+                <span className={`${isMobile? "text-2xl max-w-[100px]" : "text-5xl py-3" } font-bold`}>
                     {count}
                 </span>
             </div>

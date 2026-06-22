@@ -39,7 +39,7 @@ function page() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [hubName, setHubName] = useState("");
   const [hubId, setHubId] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [inTransitData, setInTransitData] = useState<InTransitData[]>([]);
 
   useEffect(() => {
@@ -340,6 +340,8 @@ function page() {
     fetchPendingIssues();
   }, [user, hubId]);
 
+  const [showNav, setShowNav] = useState(false);
+
   if (loading) {
     return (
       <div className={`w-screen h-screen flex flex-col items-center justify-center bg-white gap-[calc(0.6vw+0.4rem)]`}>
@@ -359,21 +361,31 @@ function page() {
 
   if(user?.uid) return (
     <div className={`${isDark ? "text-[var(--light-color)] bg-[var(--dashboard-primary)]" : "bg-[var(--dashboard-light)] text-[var(--dark-color)]"}
-        h-screen flex flex-col items-start justify-start scroll-smooth p-[calc(0.6vw+0.4rem)]`}>
+        ${isMobile? "h-auto" : "h-screen"}
+        flex flex-col items-start justify-start scroll-smooth p-[calc(0.6vw+0.4rem)]`}>
   
         {/* dashboard */}
 
-        <div className="h-full w-full flex flex-row items-center justify-center gap-3">
+        <div className={`${isMobile? "flex-col h-screen overflow-y-hidden" : "flex-row h-full"}
+           w-full flex items-center justify-center gap-3`}>
 
-          <SideNav isDark={isDark} setIsDark={setIsDark} setActiveTab={setActiveTab} hubName={hubName} setHubName={setHubName}/>
+          {!isMobile && <SideNav isDark={isDark} setIsDark={setIsDark} setActiveTab={setActiveTab} hubName={hubName} setHubName={setHubName} setShowNav={setShowNav}/>}
+          {showNav && isMobile && <SideNav isDark={isDark} setIsDark={setIsDark} setActiveTab={setActiveTab} hubName={hubName} setHubName={setHubName}
+            setShowNav={setShowNav}/>}
+
+          {isMobile && 
+            <div className="h-auto w-full flex flex-row items-center justify-start py-1">
+              <i className="bx bx-menu text-[32px]"onClick={() => setShowNav((prev) => !prev)} />
+            </div>
+          }
 
           {activeTab == "dashboard" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
-            ${isMobile? "overflow-y-scroll hide-scrollbar" : ""}
-            flex-1 h-full w-full flex flex-col items-center justify-start rounded-lg`}>
-
+            ${isMobile? "h-full w-full items-start overflow-y-auto hide-scrollbar" : "flex-1 h-full w-full items-center rounded-lg"}
+            flex flex-col justify-start `}>
+            
             {!hubName && <CreateHub />}
             
-            {hubName && <div className="w-full flex flex-row items-center justify-center gap-3 p-3 flex-wrap">
+            {!isMobile && hubName && <div className={`w-full flex flex-row items-center justify-center gap-3 flex-wrap p-3`}>
               <DashboardCard isDark={isDark} title={"Total Drivers"} count={driverCount} icon="car"/>
               <DashboardCard isDark={isDark} title={"Total Delivered"} count={deliveredCount} icon="package"/>
               <DashboardCard isDark={isDark} title={"Avg. Delivery Time"} count={
@@ -383,6 +395,21 @@ function page() {
               } icon="clock-dashed-half"/>
               <DashboardCard isDark={isDark} title={"Pending Issues"} count={pending.length} icon="alert-triangle"/>
             </div>}
+
+            {isMobile && hubName && <div className={`w-full flex flex-col items-center justify-center gap-3 p-3 bordered`}>
+              <div className="w-full flex flex-row gap-3">
+                <DashboardCard isDark={isDark} title={"Total Active Drivers"} count={driverCount} icon="car"/>
+                <DashboardCard isDark={isDark} title={"Total Delivered"} count={deliveredCount} icon="package"/>
+              </div>
+              <div className="w-full flex flex-row gap-3">
+                <DashboardCard isDark={isDark} title={"Avg. Delivery Time"} count={
+                  <>
+                    {formatDeliveryTime(avgDeliveryTime)}
+                  </>
+                } icon="clock-dashed-half"/>
+                <DashboardCard isDark={isDark} title={"Pending Issues"} count={pending.length} icon="alert-triangle"/>
+              </div>
+            </div>}
             
             {hubName && <div className="h-full w-full flex flex-row items-center justify-center gap-3 p-3">
               <LiveStatus isDark={isDark} inTransitData={inTransitData}/>
@@ -391,21 +418,24 @@ function page() {
           </div>}
 
           {activeTab == "history" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
-            flex-1 h-full w-full flex flex-col items-center justify-center rounded-lg overflow-y-scroll`}>
+            ${isMobile? "" : "rounded-lg"}
+            flex-1 h-full w-full flex flex-col items-center justify-center overflow-y-scroll`}>
 
             <HistoryTab isDark={isDark} activeTab={activeTab}/>
             
           </div>}
 
           {activeTab == "drivers" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
-            flex-1 h-full w-full flex flex-col items-center justify-center rounded-lg overflow-y-scroll`}>
+            ${isMobile? "h-auto" : "h-full"}
+            flex-1 w-full flex flex-col items-center justify-center rounded-lg overflow-y-scroll`}>
 
             <DriverTab isDark={isDark} activeTab={activeTab}/>
             
           </div>}
 
           {activeTab == "reports" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
-            flex-1 h-full w-full flex flex-col items-center justify-center rounded-lg`}>
+            ${isMobile? "h-auto" : "h-full flex-1"}
+            w-full flex flex-col items-start justify-start rounded-lg`}>
 
             <ReportsTab isDark={isDark} activeTab={activeTab} />
 
@@ -419,7 +449,8 @@ function page() {
           </div>}
 
           {activeTab == "chat" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
-            flex-1 h-full w-full flex flex-col items-center justify-center rounded-lg`}>
+            ${isMobile? "h-full overflow-y-auto hide-scroll" : "h-full flex-1"}
+            w-full flex flex-col items-center justify-center rounded-lg`}>
 
             <CreateChat isDark={isDark} hubName={hubName} />
 

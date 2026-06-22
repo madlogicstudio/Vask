@@ -2,7 +2,7 @@
 
 import { useIsMobile } from "@/app/home/hooks/useIsMobile"
 import type { User } from "../../page"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { db, auth } from "@/app/home/firebase/FirebaseConfig"
 import {
     collection,
@@ -27,6 +27,10 @@ export const CreateChat = ({ isDark, hubName }: CreateChatProps) => {
     const [chatId, setChatId] = useState("");
     const [message, setMessage] = useState("");
     const [hubId, setHubId] = useState("");
+    const isMobile = useIsMobile();
+
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     type Message = {
         id: string;
@@ -100,15 +104,40 @@ export const CreateChat = ({ isDark, hubName }: CreateChatProps) => {
         fetchChatId();
     }, [user, hubId]);
 
+    //forImageCloudinary
+    const uploadToCloudinary = async (file: File) => {
+        const formData = new FormData();
+
+        formData.append("file", file);
+        formData.append("upload_preset", "madlogicstudio_vask_image_upload"); // from Cloudinary
+        formData.append("cloud_name", "de4i0nirw");
+
+        const res = await fetch(
+            `https://api.cloudinary.com/v1_1/de4i0nirw/image/upload`,
+            {
+            method: "POST",
+            body: formData,
+            }
+        );
+
+        const data = await res.json();
+        return data.secure_url; // image URL
+    };
+
     //store chats
     const sendMessage = async () => {
-
-        if (!message.trim()) return;
-        if (!hubId) return;
-        if (!chatId) return;
-        if (!user) return;
+        if (!message.trim() && !selectedImage) return;
+        if (!hubId || !chatId || !user) return;
 
         try {
+            let imageUrl = "";
+            let type: "text" | "image" = "text";
+
+            // IMAGE UPLOAD VIA CLOUDINARY
+            if (selectedImage) {
+                imageUrl = await uploadToCloudinary(selectedImage);
+                type = "image";
+            }
 
             await addDoc(
                 collection(
@@ -122,15 +151,17 @@ export const CreateChat = ({ isDark, hubName }: CreateChatProps) => {
                     "messages"
                 ),
                 {
-                    text: message,
+                    text: message || "",
                     senderId: user.uid,
                     senderName: "Operator",
-                    createdAt: serverTimestamp()
+                    type,
+                    imageUrl: imageUrl || "",
+                    createdAt: serverTimestamp(),
                 }
             );
 
             setMessage("");
-
+            setSelectedImage(null);
         } catch (error) {
             console.error(error);
         }
@@ -172,11 +203,11 @@ export const CreateChat = ({ isDark, hubName }: CreateChatProps) => {
 
     return (
         <div className={`${isDark ? "text-[var(--dashboard-light)] bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)] text-[var(--dashboard-dark)]"}
-            h-full w-full flex flex-col items-start justify-start gap-3 p-3 rounded-lg`}>
+            ${isMobile? "h-full overflow-y-auto hide-scroll" : "h-full"}
+            w-full flex flex-col items-start justify-start gap-3 p-3 rounded-lg`}>
             
-            {/* message field */}
-            <div className={`${isDark ? "bg-[var(--dashboard-primary)]" : "bg-[var(--dashboard-light)]"}
-                flex-1 w-full rounded-lg p-3 overflow-y-auto`}>
+            <div className={`${isDark ? "bg-[var(--dashboard-primary)] h-full" : "bg-[var(--dashboard-light)] h-full"}
+                flex-1 w-full rounded-lg p-3 overflow-y-auto hide-scrollbar`}>
 
                 {messages.map((msg) => {
                     const isMine = msg.senderId === user?.uid;
@@ -227,19 +258,33 @@ export const CreateChat = ({ isDark, hubName }: CreateChatProps) => {
 
             </div>
 
-            {/* input field */}
             <div className="h-auto w-full border border-white flex flex-row items-center justify-center rounded-full p-1">
-                <i className="bx bx-plus text-[18px] p-3 cursor-pointer rounded-full hover:bg-[var(--dashboard-primary)] transition duration-300 ease-in-out" />
+                <i className={`${isMobile? "p-3" : "p-3"}
+                    bx bx-plus text-[18px] cursor-pointer rounded-full hover:bg-[var(--dashboard-primary)] transition duration-300 ease-in-out`} 
+                    onClick={() => fileInputRef.current?.click()}/>
                 <input
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     type="text"
                     placeholder="Write your message..."
-                    className="poppins w-full p-3 outline-none border-none"
+                    className={`${isMobile? "text-[12px] pl-0 pr-2" : "p-3"}
+                        poppins w-full outline-none border-none`}
                 />
                 <span className={`${isDark? "text-[var(--dashboard-dark)] bg-[var(--dashboard-light)]" : "text-[var(--dashboard-light)] bg-[var(--dashboard-primary)]"}
-                    poppins rounded-full py-3 px-6 cursor-pointer text-sm`} onClick={sendMessage}>Submit</span>
+                    ${isMobile? "text-[12px] py-3 px-4" : "text-sm py-3 px-6 "}
+                    poppins rounded-full cursor-pointer`} onClick={sendMessage}>Submit</span>
             </div>
+
+            <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setSelectedImage(file);
+                }}
+            />
 
         </div>
     );

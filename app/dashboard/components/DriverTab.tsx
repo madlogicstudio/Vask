@@ -86,14 +86,14 @@ export const DriverTab = ({isDark, activeTab}: DriverTabProps) => {
     return (
         <>
             {activeTab == "drivers" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
-                ${isMobile? " overflow-y-auto hide-scrollbar" : "hide-scrollbar"}
-                h-full w-full flex flex-col items-start justify-start rounded-lg p-[calc(0.6vw+0.4rem)] gap-[calc(0.6vw+0.4rem)]`}>
+                ${isMobile? " overflow-y-auto hide-scrollbar h-screen" : "hide-scrollbar h-full "}
+                w-full flex flex-col items-start justify-start rounded-lg p-[calc(0.6vw+0.4rem)] gap-[calc(0.6vw+0.4rem)]`}>
                 
                 <span className="poppins text-lg font-semibold pb-[calc(0.6vw+0.4rem)]">
                     Active Drivers:  
                 </span>
 
-                <div className="w-full flex flex-col items-start justify-start bordered">
+                {!isMobile && <div className="w-full flex flex-col items-start justify-start bordered">
                     {drivers.map((driver) => (
                         <div key={driver.id} className="w-full flex flex-row items-start justify-between bg-[var(--primary-color)] rounded-lg p-[calc(0.6vw+0.4rem)] mb-3">
 
@@ -114,7 +114,53 @@ export const DriverTab = ({isDark, activeTab}: DriverTabProps) => {
                             
                         </div>
                     ))}
-                </div>
+                </div>}
+
+                {isMobile && <div className="w-full flex flex-col gap-3">
+                    {drivers.map((driver) => (
+                        <div
+                        key={driver.id}
+                        className="
+                            w-full
+                            flex flex-col md:flex-row
+                            justify-between
+                            gap-3
+                            bg-[var(--primary-color)]
+                            rounded-lg
+                            p-3 md:p-[calc(0.6vw+0.4rem)]
+                        "
+                        >
+                        {/* LEFT SIDE */}
+                        <div className="flex flex-col gap-1 text-sm md:text-base">
+                            <p>Driver Name: {driver.driverName}</p>
+                            <p>Plate Number: {driver.plateNumber}</p>
+                            <p>Vehicle Name: {driver.vehicleName}</p>
+                            <p>Vehicle Type: {capitalize(driver.vehicleType)}</p>
+                        </div>
+
+                        {/* RIGHT SIDE */}
+                        <div className="flex flex-col md:items-end gap-2 text-sm md:text-base">
+                            <p>
+                            Date Joined:{" "}
+                            {new Date(driver.createdAt).toLocaleString()}
+                            </p>
+
+                            <p>Contact: {driver.contactNumber}</p>
+
+                            <span
+                            className="
+                                poppins bg-[var(--blue-color)]
+                                text-sm text-[color:var(--light-color)]
+                                px-3 py-2 rounded-md
+                                self-start md:self-auto
+                            "
+                            >
+                            Active
+                            </span>
+                        </div>
+                        </div>
+                    ))}
+                </div>}
 
             </div>}
         </>

@@ -194,14 +194,14 @@ export const HistoryTab = ({isDark, activeTab}: HistoryTabProps) => {
     return (    
         <>
             {activeTab == "history" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
-                ${isMobile? " overflow-y-auto hide-scrollbar" : ""}
-                h-full w-full flex flex-col items-start justify-start rounded-lg p-[calc(0.6vw+0.4rem)] gap-[calc(0.6vw+0.4rem)]`}>
+                ${isMobile? " overflow-y-auto hide-scrollbar" : "rounded-lg"}
+                h-full w-full flex flex-col items-start justify-start p-[calc(0.6vw+0.4rem)] gap-[calc(0.6vw+0.4rem)]`}>
 
-                <span className="poppins text-lg font-semibold pb-[calc(0.6vw+0.4rem)]">
+                <span className={`${isMobile? "text-md" : "text-lg"} poppins font-semibold py-3`}>
                     Recent activities: 
                 </span>
 
-                <div className="flex-1 w-full overflow-y-auto hide-scrollbar">
+                {!isMobile && <div className="flex-1 w-full overflow-y-auto hide-scrollbar">
                     {activities.map((activity, index) =>
 
                         activity.type === "report" ? (
@@ -273,7 +273,109 @@ export const HistoryTab = ({isDark, activeTab}: HistoryTabProps) => {
                             </div>
                         )
                     )}
-                </div>
+                </div>}
+
+                {isMobile && <div className="flex-1 w-full overflow-y-auto hide-scrollbar">
+                    {activities.map((activity, index) =>
+                        activity.type === "report" ? (
+                        <div
+                            key={`report-${activity.data.id}-${index}`}
+                            className="
+                            flex flex-col sm:flex-row
+                            gap-3
+                            items-start sm:items-start
+                            justify-between
+                            bg-[var(--primary-color)]
+                            rounded-lg
+                            p-3 md:p-[calc(0.6vw+0.4rem)]
+                            mb-3
+                            "
+                        >
+                            {/* LEFT CONTENT */}
+                            <div className="w-full flex flex-col gap-2 text-sm md:text-base">
+                            <span className="font-medium">
+                                {activity.data.driverName}
+                            </span>
+
+                            <div className="flex flex-col gap-1">
+                                {activity.data.reportType === "maintenance" ? (
+                                <>
+                                    <span>Description: {activity.data.description}</span>
+                                    <span>Cost: ₱{activity.data.cost}</span>
+                                </>
+                                ) : (
+                                <>
+                                    <span>Liters: {activity.data.liters}</span>
+                                    <span>Amount: ₱{activity.data.amount}</span>
+                                </>
+                                )}
+                            </div>
+
+                            <span className="text-xs md:text-sm opacity-80">
+                                {activity.data.approvedAt?.toDate?.().toLocaleString()}
+                            </span>
+                            </div>
+
+                            {/* STATUS BADGE */}
+                            <span
+                            className={`
+                                poppins text-[12px] px-3 py-2 rounded-md self-start sm:self-auto
+                                bg-[var(--white-color)]
+                                ${
+                                activity.data.status === "approved"
+                                    ? "text-green-400"
+                                    : "text-red-400"
+                                }
+                            `}
+                            >
+                            {activity.data.status === "approved" ? "Approved" : "Rejected"}
+                            </span>
+                        </div>
+                        ) : (
+                        <div
+                            key={`completed-${activity.data.id}-${index}`}
+                            className="
+                            flex flex-col sm:flex-row
+                            gap-3
+                            justify-between
+                            bg-[var(--primary-color)]
+                            rounded-lg
+                            p-3 md:p-[calc(0.6vw+0.4rem)]
+                            mb-3
+                            "
+                        >
+                            {/* LEFT CONTENT */}
+                            <div className="flex flex-col gap-1 text-sm md:text-base">
+                            <span>Driver Id: {activity.data.driverId}</span>
+                            <span>Driver Name: {activity.data.driverName}</span>
+                            <span>Delivery Id: {activity.data.deliveryId}</span>
+                            <span>
+                                Distance: {(activity.data.distance / 1000).toFixed(2)} Km
+                            </span>
+                            </div>
+
+                            {/* RIGHT CONTENT */}
+                            <div className="flex flex-col sm:items-end gap-2 text-sm md:text-base">
+                            <span
+                                className="
+                                poppins bg-[var(--white-color)]
+                                text-[12px] px-3 py-2 text-[color:var(--primary-color)]
+                                rounded-md
+                                self-start sm:self-auto
+                                "
+                            >
+                                Completed
+                            </span>
+
+                            <span className="text-xs md:text-sm opacity-80">
+                                Completed At:{" "}
+                                {new Date(activity.data.completedAt).toLocaleString()}
+                            </span>
+                            </div>
+                        </div>
+                        )
+                    )}
+                </div>}
 
             </div>}
         </>

@@ -4,7 +4,7 @@ import { useIsMobile } from "@/app/home/hooks/useIsMobile"
 import { User } from "@/app/page"
 import { useState, useEffect } from "react"
 import { db } from "@/app/home/firebase/FirebaseConfig"
-import { collection, getDocs, onSnapshot } from "firebase/firestore"
+import { doc, collection, getDocs, onSnapshot, setDoc, query, where, getDoc } from "firebase/firestore"
 import {
     BarChart,
     Bar,
@@ -23,6 +23,14 @@ import {
     CartesianGrid,
 } from "recharts";
 
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+
 type AnalyticsTabProps = {
     isDark: boolean;
     activeTab: any;
@@ -37,6 +45,17 @@ export const AnalyticsTab = ({isDark, activeTab, totalDrivers, totalDelivered, a
     const isMobile = useIsMobile();
     const [user, setUser] = useState<User | null>(null);
     const [hubId, setHubId] = useState("");
+    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [totalFuelCost, setTotalFuelCost] = useState(0);
+    const [totalTrips, setTotalTrips] = useState(0);
+    const [totalDistance, setTotalDistance] = useState(0);
+
+    const months = [
+        "January", "February", "March", "April",
+        "May", "June", "July", "August",
+        "September", "October", "November", "December"
+    ];
 
     useEffect(() => {
         const storedUser = sessionStorage.getItem("user");
@@ -82,127 +101,160 @@ export const AnalyticsTab = ({isDark, activeTab, totalDrivers, totalDelivered, a
 
         fetchHub();
     }, [user]);
-    
-    const [totalCost, setTotalCost] = useState(0);
 
+    //getTripsandDistance
     useEffect(() => {
         if (!user || !hubId) return;
 
-        const unsubscribe = onSnapshot(
-            collection(
-                db,
-                "operators",
-                user.uid,
-                "hubs",
-                hubId,
-                "reports"
-            ),
-            (snapshot) => {
-                let sum = 0;
+        const fetchCompleted = async () => {
+            const snap = await getDocs(
+            collection(db, "operators", user.uid, "hubs", hubId, "completed")
+            );
 
-                snapshot.forEach((doc) => {
-                    sum += Number(doc.data().cost) || 0;
-                });
+            const now = new Date();
+            const m = now.getMonth();
+            const y = now.getFullYear();
 
-                setTotalCost(sum);
-            }
-        );
+            let trips = 0;
+            let distance = 0;
 
-        return () => unsubscribe();
+            snap.forEach((doc) => {
+            const data = doc.data();
+
+            const date = data.completedAt?.toDate?.();
+            if (!date) return;
+
+            if (date.getMonth() !== m || date.getFullYear() !== y) return;
+
+            trips += 1;
+            distance += Number(data.distance || 0);
+            });
+
+            setTotalTrips(trips);
+            setTotalDistance(distance);
+        };
+
+        fetchCompleted();
     }, [user, hubId]);
 
-    //passTotalDriversData
-    const driverData = [
-        { month: "May", drivers: 0 },
-        { month: "Jun", drivers: totalDrivers },
-        { month: "Jul", drivers: 0 },
-        { month: "Aug", drivers: 0 },
-        { month: "Sep", drivers: 0 },
-        { month: "Oct", drivers: 0 },
-        { month: "Nov", drivers: 0 },
-        { month: "Dec", drivers: 0 },
-    ];
+    //fetchtotalFuelconsumption
+    useEffect(() => {
+        if (!user || !hubId) return;
 
-    //passsDeliveredData
-    const deliveredData = [
-        { month: "May", delivered: 0 },
-        { month: "Jun", delivered: totalDelivered },
-        { month: "Jul", delivered: 0 },
-        { month: "Aug", delivered: 0 },
-        { month: "Sep", delivered: 0 },
-        { month: "Oct", delivered: 0 },
-        { month: "Nov", delivered: 0 },
-        { month: "Dec", delivered: 0 },
-    ];
+        const fetchFuelCost = async () => {
+            const snap = await getDocs(
+            query(
+                collection(db, "operators", user.uid, "hubs", hubId, "reports"),
+                where("status", "==", "approved"),
+                where("reportType", "==", "fuelLog")
+            )
+            );
 
-    //convertTimeBacktoServerTimeStamp
-    const convertToMinutes = (time: string) => {
-        const hours = Number(time.match(/(\d+)h/)?.[1] || 0);
-        const minutes = Number(time.match(/(\d+)m/)?.[1] || 0);
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
 
-        return hours * 60 + minutes;
-    };
+            let fuelTotal = 0;
 
-    //pasDeliverytimeData
-    const deliveryTimeData = [
-        {
-            label: "Your Service",
-            value: convertToMinutes(avgDeliveryTime),
-            fill: isDark ? "#3B82F6" : "#455A64",
-        },
-        {
-            label: "PH Average",
-            value: 5760,
-            fill: isDark ? "#455A64" : "#3B82F6",
-        },
-    ];
+            snap.forEach((doc) => {
+            const data = doc.data();
+
+            const date = data.approvedAt?.toDate?.();
+            if (!date) return;
+
+            // filter THIS MONTH
+            if (
+                date.getMonth() !== currentMonth ||
+                date.getFullYear() !== currentYear
+            ) return;
+
+            // your fuel formula (same as earlier logic)
+            const liters = Number(data.liters || 0);
+            const amount = Number(data.amount || 0);
+
+            fuelTotal += liters * amount;
+            });
+
+            setTotalFuelCost(fuelTotal);
+        };
+
+        fetchFuelCost();
+    }, [user, hubId]);
 
     //fetchResolvedLogs 
     const [approvedCount, setApprovedCount] = useState(0);
     const [rejectedCount, setRejectedCount] = useState(0);
 
-    const fetchReports = async () => {
+    useEffect(() => {
         if (!user || !hubId) return;
 
-        try {
-            const reportData = await getDocs(
-                collection(
-                    db,
-                    "operators",
-                    user.uid,
-                    "hubs",
-                    hubId,
-                    "reports"
-                )
-            );
+        const ref = collection(
+            db,
+            "operators",
+            user.uid,
+            "hubs",
+            hubId,
+            "reports"
+        );
 
+        const unsub = onSnapshot(ref, (snapshot) => {
             let approved = 0;
             let rejected = 0;
 
-            reportData.forEach((doc) => {
+            snapshot.forEach((doc) => {
                 const status = doc.data().status;
 
-                if (status === "approved") {
-                    approved++;
-                } else if (status === "rejected") {
-                    rejected++;
-                }
+                if (status === "approved") approved++;
+                if (status === "rejected") rejected++;
             });
 
             setApprovedCount(approved);
             setRejectedCount(rejected);
 
-        } catch (error) {
-            console.error(error);
-        }
-    };
+        });
+
+        return () => unsub();
+    }, [user, hubId, selectedMonth, selectedYear]);
+
+    //addtoAnalytics
 
     useEffect(() => {
-        fetchReports();
-    }, [user, hubId]);
+        if (!user || !hubId) return;
+
+        const now = new Date();
+        const docId = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+        const reportRef = doc(
+            db,
+            "operators",
+            user.uid,
+            "hubs",
+            hubId,
+            "analytics",
+            docId
+        );
+
+        setDoc(reportRef, {
+            approved: approvedCount,
+            rejected: rejectedCount,
+            updatedAt: new Date(),
+        }, { merge: true });
+
+    }, [approvedCount, rejectedCount, user, hubId]);
 
     //passIssueData
-    const reportStatusData = [
+
+    const isEmpty = approvedCount === 0 && rejectedCount === 0;
+
+    const reportStatusData = isEmpty
+    ? [
+        {
+            name: "No Data",
+            value: 1,
+            fill: "rgba(0,0,0,0.05)",
+        },
+        ]
+    : [
         {
             name: "Pending",
             value: pending,
@@ -216,61 +268,101 @@ export const AnalyticsTab = ({isDark, activeTab, totalDrivers, totalDelivered, a
         {
             name: "Rejected",
             value: rejectedCount,
-            fill: "#EF4444", 
+            fill: "#EF4444",
         },
-    ];
+        ];
 
     //fetchMaintenance&fuelCost
-    const [maintenanceCost, setMaintenanceCost] = useState(0);
-    const [fuelCost, setFuelCost] = useState(0);
+    const [fuelByDay, setFuelByDay] = useState<{ date: string; fuel: number }[]>([]);
 
     useEffect(() => {
         if (!user || !hubId) return;
 
-        const fetchApprovedCosts = async () => {
-            const snap = await getDocs(
-                collection(db, "operators", user.uid, "hubs", hubId, "reports")
+        const fetchFuelCosts = async () => {
+            const q = query(
+                collection(db, "operators", user.uid, "hubs", hubId, "reports"),
+                where("status", "==", "approved"),
+                where("reportType", "==", "fuelLog")
             );
 
-            let maintenance = 0;
-            let fuel = 0;
+            const snap = await getDocs(q);
 
-            snap.forEach((doc) => {
-                const data = doc.data();
+            const year = selectedYear;
+            const month = selectedMonth;
 
-                if (data.status !== "approved") return;
+            // get last day of selected month
+            const lastDay = new Date(year, month + 1, 0).getDate();
 
-                const type = data.reportType;
+            const fuelMap: Record<number, number> = {};
 
-                if (type === "maintenance") {
-                    maintenance += Number(data.cost) || 0;
-                }
+            // 1 → last day
+            for (let day = 1; day <= lastDay; day++) {
+                fuelMap[day] = 0;
+            }
 
-                if (type === "fuelLog") {
-                    const liters = Number(data.liters) || 0;
-                    const amount = Number(data.amount) || 0;
+            snap.forEach((d) => {
+                const data = d.data();
 
-                    fuel += liters * amount;
-                }
+                const date = data.approvedAt?.toDate?.();
+                if (!date) return;
+
+                // filter selected month/year
+                if (
+                    date.getFullYear() !== year ||
+                    date.getMonth() !== month
+                ) return;
+
+                const day = date.getDate();
+
+                const liters = Number(data.liters) || 0;
+                const amount = Number(data.amount) || 0;
+
+                fuelMap[day] += liters * amount;
             });
 
-            setMaintenanceCost(maintenance);
-            setFuelCost(fuel);
+            const result = Object.keys(fuelMap).map((day) => ({
+                date: `${months[month]} ${day}`,
+                fuel: fuelMap[Number(day)],
+            }));
+
+            setFuelByDay(result);
+        };
+    
+        fetchFuelCosts();
+    }, [user, hubId, selectedMonth, selectedYear]);
+
+
+    //fetchSelectedMonthAndYear
+    const selectedDocId = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}`;
+
+    useEffect(() => {
+        if (!user || !hubId) return;
+
+        const fetchAnalytics = async () => {
+            const ref = doc(
+                db,
+                "operators",
+                user.uid,
+                "hubs",
+                hubId,
+                "analytics",
+                selectedDocId
+            );
+
+            const snap = await getDoc(ref);
+
+            if (snap.exists()) {
+                const data = snap.data();
+                setApprovedCount(data.approved || 0);
+                setRejectedCount(data.rejected || 0);
+            } else {
+                setApprovedCount(0);
+                setRejectedCount(0);
+            }
         };
 
-        fetchApprovedCosts();
-    }, [user, hubId]);
-
-    //passthedatahere
-    const costData = [
-        {
-            name: "Approved costs this month",
-            maintenance: maintenanceCost,
-            fuel: fuelCost,
-            total: maintenanceCost + fuelCost,
-        },
-    ];
-
+        fetchAnalytics();
+    }, [user, hubId, selectedDocId]);
 
     if (!mounted) return null;
 
@@ -280,184 +372,224 @@ export const AnalyticsTab = ({isDark, activeTab, totalDrivers, totalDelivered, a
                 ${isMobile? " overflow-y-auto hide-scrollbar" : "hide-scrollbar"}
                 h-full w-full flex flex-col items-start justify-start rounded-lg p-[calc(0.6vw+0.4rem)] gap-[calc(0.6vw+0.4rem)]`}>
                 
-                <div className="flex flex-row gap-3">
+                {/* display */}
+                <div className={`${isMobile? "flex-col" : "flex-row"} 
+                    w-full flex items-start justify-between`}>
 
-                    <div className="w-[400px] h-[400px] min-h-[400px] relative my-3 flex flex-col items-start justify-start gap-1">
-                        <span className="poppins text-lg font-semibold pb-[calc(0.6vw+0.4rem)]">
-                            Total Active Drivers:  
+                    {isMobile && <div className="h-full w-full flex flex-col items-center justify-center gap-3 my-6">
+                        <div className={`${isMobile? "w-full justify-center" : ""}
+                            flex flex-row gap-3 items-start mb-4`}>
+            
+                            {/* Month Selector */}
+                            <Select
+                                value={String(selectedMonth)}
+                                onValueChange={(value) => setSelectedMonth(Number(value))}
+                                >
+                                <SelectTrigger className="w-[120px]">
+                                    <SelectValue placeholder="Select Month" />
+                                </SelectTrigger>
+
+                                <SelectContent>
+                                    {months.map((m, i) => (
+                                    <SelectItem key={i} value={String(i)}>
+                                        {m}
+                                    </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            {/* Year Selector */}
+                            <Select
+                                value={String(selectedYear)}
+                                onValueChange={(value) => setSelectedYear(Number(value))}
+                                >
+                                <SelectTrigger className="w-[120px]">
+                                    <SelectValue placeholder="Year" />
+                                </SelectTrigger>
+
+                                <SelectContent>
+                                    {[2026, 2027, 2028].map((y) => (
+                                    <SelectItem key={y} value={String(y)}>
+                                        {y}
+                                    </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                        </div>
+
+                        <span className="poppins bg-[var(--blue-color)] text-sm text-[color:var(--light-color)] px-[calc(0.6vw+0.4rem)] 
+                            py-[calc(0.4vw+0.3rem)] cursor-pointer rounded-md max-w-[160px] text-center"
+                            >
+                            Generate report
                         </span>
+                    </div>}
+
+                    {/* cards */}
+                    <div className={`${isMobile? "w-full flex-col items-center justify-center" : "flex-row"}
+                        flex-1 flex gap-3 my-3`}>
+                        {/* Fuel Cost */}
+                        <div className={`${isDark? "bg-[var(--primary-color)] text-[color:var(--dashboard-light)]" : "bg-[var(--dashboard-light)] text-[color:var(--primary-color)]"}
+                            ${isMobile? "w-[260px] p-6" : "w-[360px] p-12"}
+                            rounded-lg shadow flex flex-col items-start justify-center relative cursor-pointer`}>
+                            <p className="text-[16px]">Total Fuel Cost</p>
+                            <h2 className="text-[24px] font-semibold">
+                            ₱{totalFuelCost.toLocaleString()}
+                            </h2>
+                            <i className="bx bx-petrol-pump absolute top-0 right-0 p-3 text-[48px]" />
+                        </div>
+
+                        {/* Trips */}
+                        <div className={`${isDark? "bg-[var(--primary-color)] text-[color:var(--dashboard-light)]" : "bg-[var(--dashboard-light)] text-[color:var(--primary-color)]"}
+                            ${isMobile? "w-[260px] p-6" : "w-[360px] p-12"}
+                            rounded-lg shadow flex flex-col items-start justify-center relative cursor-pointer`}>
+                            <p className="text-[16px]">Completed Trips</p>
+                            <h2 className="text-[24px] font-semibold">{totalTrips}</h2>
+                            <i className="bx bx-trip absolute top-0 right-0 p-3 text-[48px]" />
+                        </div>
+
+                        {/* Distance */}
+                        <div className={`${isDark? "bg-[var(--primary-color)] text-[color:var(--dashboard-light)]" : "bg-[var(--dashboard-light)] text-[color:var(--primary-color)]"}
+                            ${isMobile? "w-[260px] p-6" : "w-[360px] p-12"}
+                            rounded-lg shadow flex flex-col items-start justify-center relative cursor-pointer`}>
+                            <p className="ttext-[16px]">Total Distance</p>
+                            <h2 className="text-[24px] font-semibold">
+                            {totalDistance.toFixed(1)} km
+                            </h2>
+                            <i className="bx bx-road absolute top-0 right-0 p-3 text-[48px]" />
+                        </div>
+                    </div>
+
+                    {/* selector&generate */}
+                    {!isMobile && <div className="flex flex-col items-end justify-end gap-3 my-3">
+                        <div className={`${isMobile? "w-full justify-center" : "h-full"}
+                            flex flex-row gap-3 items-center mb-4`}>
+            
+                            {/* Month Selector */}
+                            <Select
+                                value={String(selectedMonth)}
+                                onValueChange={(value) => setSelectedMonth(Number(value))}
+                                >
+                                <SelectTrigger className="w-[120px]">
+                                    <SelectValue placeholder="Select Month" />
+                                </SelectTrigger>
+
+                                <SelectContent>
+                                    {months.map((m, i) => (
+                                    <SelectItem key={i} value={String(i)}>
+                                        {m}
+                                    </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            {/* Year Selector */}
+                            <Select
+                                value={String(selectedYear)}
+                                onValueChange={(value) => setSelectedYear(Number(value))}
+                                >
+                                <SelectTrigger className="w-[120px]">
+                                    <SelectValue placeholder="Year" />
+                                </SelectTrigger>
+
+                                <SelectContent>
+                                    {[2026, 2027, 2028].map((y) => (
+                                    <SelectItem key={y} value={String(y)}>
+                                        {y}
+                                    </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                        </div>
+
+                        <span className="poppins bg-[var(--blue-color)] text-sm text-[color:var(--light-color)] px-[calc(0.6vw+0.4rem)] 
+                            py-[calc(0.4vw+0.3rem)] cursor-pointer rounded-md max-w-[160px] text-center"
+                            >
+                            Generate report
+                        </span>
+                    </div>}
+
+                </div>
+
+                {/* charts */}
+                <div className={`${isMobile? "w-full justify-center flex-col" : "flex-row"}
+                    flex gap-6`}>
+
+                    <div className={`${isMobile? "w-full items-center" : "w-[600px]"}
+                        h-[400px]`}>
+                        <div className={`${isMobile? "flex-col justify-center" : "flex-row"}
+                            flex items-center gap-3 mb-3`}>
+                            <span className="poppins text-lg font-semibold">
+                                Daily Fuel Cost
+                            </span>
+                            <span className="poppins text-sm font-semibold text-gray-300">
+                                this month of {months[selectedMonth]} {selectedYear}
+                            </span>
+                        </div>
+
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={driverData}>
-                                <CartesianGrid
-                                    stroke={isDark ? "#4B5563" : "#E5E7EB"}
-                                    strokeDasharray="3 3"
-                                />
-
-                                <XAxis
-                                    dataKey="month"
-                                    stroke={isDark ? "#FFFFFF" : "#000000"}
-                                    tick={{ fill: isDark ? "#FFFFFF" : "#000000" }}
-                                />
-
-                                <YAxis
-                                    stroke={isDark ? "#FFFFFF" : "#000000"}
-                                    tick={{ fill: isDark ? "#FFFFFF" : "#000000" }}
-                                />
-
+                            <BarChart data={fuelByDay}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="date" />
+                                <YAxis />
                                 <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: isDark ? "#1F2937" : "#FFFFFF",
-                                        border: isDark ? "1px solid #374151" : "1px solid #D1D5DB",
-                                        color: isDark ? "#FFFFFF" : "#000000",
+                                    formatter={(value) => {
+                                        const amount = Number(value ?? 0);
+                                        return [`₱${amount.toLocaleString()}`, "Fuel Cost"];
                                     }}
                                 />
-
+                                <Legend />
                                 <Bar
-                                    dataKey="drivers"
+                                    dataKey="fuel"
                                     fill={isDark ? "#3B82F6" : "#455A64"}
+                                    radius={[5, 5, 0, 0]}
                                 />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
-                    <div className="w-[400px] h-[400px] min-h-[400px] relative my-3 flex flex-col items-start justify-start gap-1">
-                        <span className="poppins text-lg font-semibold pb-[calc(0.6vw+0.4rem)]">
-                            Total Delivered:
-                        </span>
 
-                        <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={deliveredData}>
-                                <CartesianGrid
-                                    stroke={isDark ? "#4B5563" : "#E5E7EB"}
-                                    strokeDasharray="3 3"
-                                />
+                    <div className={`${isMobile? "w-full items-center mt-16" : "w-[400px] min-h-[400px]"}
+                        h-[400px] relative mb-3 flex flex-col gap-1`}>
+                        <div className={`${isMobile? "flex-col justify-center" : "flex-row"}
+                            flex items-center gap-3 mb-3`}>
+                            <span className="poppins text-lg font-semibold">
+                                Reports
+                            </span>
+                            <span className="poppins text-sm font-semibold text-gray-300">
+                                this month of {months[selectedMonth]} {selectedYear}
+                            </span>
+                        </div>
 
-                                <XAxis
-                                    dataKey="month"
-                                    stroke={isDark ? "#FFFFFF" : "#000000"}
-                                    tick={{ fill: isDark ? "#FFFFFF" : "#000000" }}
-                                />
-
-                                <YAxis
-                                    stroke={isDark ? "#FFFFFF" : "#000000"}
-                                    tick={{ fill: isDark ? "#FFFFFF" : "#000000" }}
-                                />
-
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: isDark ? "#1F2937" : "#FFFFFF",
-                                        border: isDark
-                                            ? "1px solid #374151"
-                                            : "1px solid #D1D5DB",
-                                    }}
-                                />
-
-                                <Line
-                                    type="monotone"
-                                    dataKey="delivered"
-                                    stroke={isDark ? "#3B82F6" : "#455A64"}
-                                    strokeWidth={3}
-                                    dot={{ r: 5 }}
-                                />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </div>
-                    <div className="w-[400px] h-[400px] min-h-[400px] relative my-3 flex flex-col gap-1">
-                        <span className="poppins text-lg font-semibold">
-                            Total Pending Issues: 
-                        </span>
+                        {isEmpty && <span className="w-full poppins text-md text-gray-500 text-center mt-3">
+                            No data available.
+                        </span>}
 
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
-                                    data={reportStatusData}
-                                    dataKey="value"
-                                    nameKey="name"
-                                    innerRadius={80}
-                                    outerRadius={120}
-                                    paddingAngle={5}
+                                data={reportStatusData}
+                                dataKey="value"
+                                nameKey="name"
+                                innerRadius={80}
+                                outerRadius={120}
+                                paddingAngle={5}
                                 />
 
                                 <Tooltip />
-                                <Legend />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
-
-                </div>
-
-                <div className="flex flex-row gap-3">
-
-                    <div className="w-[400px] h-[400px] min-h-[400px] relative my-3 flex flex-col gap-1">
-                        <span className="poppins text-lg font-semibold">
-                            Average Delivery Time Comparison
-                        </span>
-
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={deliveryTimeData}
-                                    dataKey="value"
-                                    nameKey="label"
-                                    innerRadius={80}
-                                    outerRadius={120}
-                                    paddingAngle={5}
-                                />
-
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: isDark ? "#1F2937" : "#FFFFFF",
-                                        border: isDark
-                                            ? "1px solid #374151"
-                                            : "1px solid #D1D5DB",
-                                        color: isDark ? "#FFFFFF" : "#000000",
-                                    }}
-                                />
 
                                 <Legend
-                                    wrapperStyle={{
-                                        color: isDark ? "#FFFFFF" : "#000000",
-                                    }}
+                                formatter={(value) =>
+                                    isEmpty ? "No data available" : value
+                                }
                                 />
                             </PieChart>
                         </ResponsiveContainer>
 
-                        <span className="text-sm opacity-70">
-                            Philippine parcel delivery benchmark: approximately 4 business days nationwide via Transportify Philippines and major courier delivery estimates.
-                        </span>
-                    </div>
-                    
-                    <div className="w-[400px] h-[400px] min-h-[400px] relative my-3 flex flex-col gap-1">
-                        <span className="poppins text-lg font-semibold mb-3">
-                            Approved Costs:
-                        </span>
-                        <ResponsiveContainer width="100%" height="100%">
-                            <ComposedChart data={costData}>
-                                
-                                <CartesianGrid strokeDasharray="3 3" />
-
-                                <XAxis dataKey="name" />
-                                <YAxis />
-
-                                <Tooltip />
-                                <Legend />
-
-                                <Bar dataKey="maintenance" fill="#3B82F6" name="Maintenance Cost" />
-                                <Bar dataKey="fuel" fill="#F59E0B" name="Fuel Cost" />
-
-                                <Line
-                                    type="monotone"
-                                    dataKey="total"
-                                    stroke="#10B981"
-                                    strokeWidth={3}
-                                    name="Total Cost"
-                                />
-
-                            </ComposedChart>
-                        </ResponsiveContainer>
                     </div>
 
                 </div>
-        
+
             </div>}
         </>
     )

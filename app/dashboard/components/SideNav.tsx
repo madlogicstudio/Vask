@@ -8,6 +8,7 @@ import { Theme } from "@/app/home/components/Theme"
 import { auth } from "@/app/home/firebase/FirebaseConfig";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation"
+import { useIsMobile } from "@/app/home/hooks/useIsMobile"
 
 type SideNavProps = {
     isDark: boolean;
@@ -15,28 +16,35 @@ type SideNavProps = {
     setHubName: React.Dispatch<React.SetStateAction<string>>;
     setIsDark: React.Dispatch<React.SetStateAction<boolean>>;
     setActiveTab: React.Dispatch<React.SetStateAction<string>>;
+    setShowNav: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const SideNav = ({isDark, hubName, setHubName, setIsDark, setActiveTab}: SideNavProps) => {
+export const SideNav = ({isDark, hubName, setHubName, setIsDark, setActiveTab, setShowNav}: SideNavProps) => {
 
     const [active, setActive] = useState("dashboard");
     const router = useRouter();
     const [signout, setSignout] = useState(false);
+    const isMobile = useIsMobile();
     const activeStyle = isDark ? "bg-[var(--dashboard-primary)]" : "bg-[var(--dashboard-light)]";
 
     return (
         <div className={`${isDark ? "text-[var(--dashboard-light)] bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)] text-[var(--dashboard-dark)]"}
-            h-full w-[240px] flex flex-col items-start justify-start scroll-smooth p-3 gap-[calc(0.6vw+0.4rem)] rounded-lg`}>
+            ${isMobile? 
+                "h-full w-[240px] flex flex-col items-start justify-start scroll-smooth p-3 gap-3 absolute top-0 left-0 z-20 overflow-y-scroll" 
+                : 
+                "h-full w-[240px] flex flex-col items-start justify-start scroll-smooth p-3 gap-3 rounded-lg"
+            }`}>
             
             <div className="w-full flex flex-row items-center justify-between">
-                <img src={`${isDark? DarkIcon.src : Icon.src}`} className="h-12 w-12" alt="" />
-                <Theme 
+                <img src={`${isDark? DarkIcon.src : Icon.src}`} className={`${isMobile? "h-10 w-10" : "h-12 w-12"}`} alt="" />
+                {!isMobile && <Theme 
                     systemIcon="bx bx-desktop"
                     lightIcon="bx bx-sun"
                     darkIcon="bx bx-moon"
                     isDark={isDark}
                     setIsDark={setIsDark}
-                />
+                />}
+                {isMobile && <i className="bx bx-x text-[32px]" onClick={() => setShowNav((prev) => !prev)}/>}
             </div>
 
             <UserProfile isDark={isDark} hubName={hubName} setHubName={setHubName}/>

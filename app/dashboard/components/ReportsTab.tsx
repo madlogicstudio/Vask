@@ -126,7 +126,13 @@ function ReportsTab({isDark, activeTab }: ReportsTabProps) {
                 driverId: doc.data().driverId || ""
             }))
         );
+
     };
+
+    useEffect(() => {
+        console.log("Maintenance: ", maintenanceData);
+        console.log("Fuel: ", fuelLogData);
+    }, [maintenanceData, fuelLogData]);
 
     useEffect(() => {
         fetchReports();
@@ -168,7 +174,8 @@ function ReportsTab({isDark, activeTab }: ReportsTabProps) {
                     ...maintenanceData,
                     reportType: "maintenance",
                     status: "approved",
-                    approvedAt: serverTimestamp()
+                    approvedAt: serverTimestamp(),
+                    read: false,
                 }
             );
 
@@ -212,7 +219,8 @@ function ReportsTab({isDark, activeTab }: ReportsTabProps) {
                 ...fuelSnap.data(),
                 reportType: "fuelLog",
                 status: "approved",
-                approvedAt: serverTimestamp()
+                approvedAt: serverTimestamp(),
+                read: false,
             }
         );
 
@@ -257,7 +265,8 @@ function ReportsTab({isDark, activeTab }: ReportsTabProps) {
                     ...maintenanceData,
                     reportType: "maintenance",
                     status: "rejected",
-                    approvedAt: serverTimestamp()
+                    approvedAt: serverTimestamp(),
+                    read: false,
                 }
             );
 
@@ -301,7 +310,8 @@ function ReportsTab({isDark, activeTab }: ReportsTabProps) {
                 ...fuelSnap.data(),
                 reportType: "fuelLog",
                 status: "rejected",
-                approvedAt: serverTimestamp()
+                approvedAt: serverTimestamp(),
+                read: false,
             }
         );
 
@@ -313,16 +323,16 @@ function ReportsTab({isDark, activeTab }: ReportsTabProps) {
     return (
         <>
             {activeTab == "reports" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
-                ${isMobile? " overflow-y-auto hide-scrollbar" : ""}
-                h-full w-full flex flex-row items-center justify-start rounded-lg p-[calc(0.6vw+0.4rem)] gap-[calc(0.6vw+0.4rem)]`}>
+                ${isMobile? " overflow-y-auto hide-scrollbar flex-col items-start justify-start h-auto" : "flex-row items-center justify-start rounded-lg h-full"}
+                w-full flex p-[calc(0.6vw+0.4rem)] gap-[calc(0.6vw+0.4rem)]`}>
                 
-                <div className="flex-1 h-full flex flex-col items-start justify-start">
+                <div className="flex-1 h-full w-full flex flex-col items-start justify-start">
                     
-                    <span className="poppins text-lg font-semibold pb-[calc(0.6vw+0.4rem)]">
+                    <span className={`${isMobile? "text-md" : "text-lg"} poppins font-semibold py-3`}>
                         Fuel Log :
                     </span>
 
-                    <div className="flex-1 w-full overflow-y-auto hide-scrollbar">
+                    {!isMobile && <div className="flex-1 w-full overflow-y-auto hide-scrollbar">
 
                         <div className="w-full flex flex-col gap-3">
                             {fuelLogData.map((item) => (
@@ -387,17 +397,103 @@ function ReportsTab({isDark, activeTab }: ReportsTabProps) {
 
                         </div>
 
-                    </div>
+                    </div>}
+
+                    {isMobile && <div className="flex-1 w-full overflow-y-auto hide-scrollbar">
+                        <div className="w-full flex flex-col gap-3">
+                            {fuelLogData.map((item) => (
+                            <div
+                                key={item.id}
+                                className="flex flex-col bg-[var(--primary-color)] rounded-lg"
+                            >
+
+                                <div
+                                className="
+                                    p-3 md:p-[calc(0.6vw+0.4rem)]
+                                    flex flex-col md:flex-row md:justify-between
+                                    gap-3
+                                "
+                                >
+
+                                <div className="flex flex-col gap-2 text-sm md:text-base">
+                                    <div className="flex justify-start md:justify-start gap-2">
+                                        <span>Liters:</span>
+                                        <span>{item.liters}</span>
+                                    </div>
+
+                                    <div className="flex justify-start md:justify-start gap-2">
+                                    <span>Amount:</span>
+                                    <span>₱{item.amount}</span>
+                                    </div>
+
+                                    <div className="flex justify-start md:justify-start gap-2">
+                                    <span>Status:</span>
+                                    <span>{item.status}</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col md:items-end gap-2 text-sm md:text-base">
+                                    {item.fuelLogImg && (
+                                    <span
+                                        className="text-[color:var(--pink-color)] underline cursor-pointer"
+                                        onClick={() => setSelectedImage(item.fuelLogImg)}
+                                    >
+                                        View Receipt
+                                    </span>
+                                    )}
+
+                                    <span>{item.driverId}</span>
+                                    <span>{item.driverName}</span>
+                                </div>
+                                </div>
+
+                                <div
+                                className="
+                                    flex flex-col sm:flex-row
+                                    gap-2
+                                    p-3 pt-0
+                                "
+                                >
+                                <span
+                                    className="
+                                    poppins bg-[var(--blue-color)]
+                                    text-sm text-[color:var(--light-color)]
+                                    px-3 py-2 rounded-md cursor-pointer
+                                    text-center
+                                    w-full sm:w-auto
+                                    "
+                                    onClick={() => approveFuelLog(item.id)}
+                                >
+                                    Approve
+                                </span>
+
+                                <span
+                                    className="
+                                    poppins bg-[var(--red-color)]
+                                    text-sm text-[color:var(--light-color)]
+                                    px-3 py-2 rounded-md cursor-pointer
+                                    text-center
+                                    w-full sm:w-auto
+                                    "
+                                    onClick={() => rejectFuelLog(item.id)}
+                                >
+                                    Reject
+                                </span>
+                                </div>
+                            </div>
+                            ))}
+                        </div>
+                    </div>}
 
                 </div>
 
-                <div className="flex-1 h-full flex flex-col items-start justify-start">
+                <div className="flex-1 w-full h-full flex flex-col items-start justify-start">
                     
-                    <span className="poppins text-lg font-semibold pb-[calc(0.6vw+0.4rem)]">
+                    <span className={`${isMobile? "text-md" : "text-lg"} poppins font-semibold py-3`}>
                         Maintenance Log :
                     </span>
 
-                    <div className="flex-1 w-full overflow-y-auto hide-scrollbar">
+                    {!isMobile && <div className="flex-1 w-full overflow-y-auto hide-scrollbar">
 
                         <div className="w-full flex flex-col gap-3">
 
@@ -462,7 +558,94 @@ function ReportsTab({isDark, activeTab }: ReportsTabProps) {
                             
                         </div>
 
-                    </div>
+                    </div>}
+
+                    {isMobile && <div className="flex-1 w-full overflow-y-auto hide-scrollbar">
+                        <div className="w-full flex flex-col gap-3">
+
+                            {maintenanceData.map((item) => (
+                            <div
+                                key={item.id}
+                                className="flex flex-col bg-[var(--primary-color)] rounded-lg"
+                            >
+                                {/* TOP CONTENT */}
+                                <div
+                                className="
+                                    p-3 md:p-[calc(0.6vw+0.4rem)]
+                                    flex flex-col md:flex-row
+                                    md:justify-between
+                                    gap-3
+                                "
+                                >
+                                {/* LEFT SIDE */}
+                                <div className="flex flex-col gap-2 text-sm md:text-base">
+                                    <div className="flex">
+                                    <span>{item.description}</span>
+                                    </div>
+
+                                    <div className="flex justify-between md:justify-start gap-2">
+                                    <span>Amount:</span>
+                                    <span>₱{item.cost}</span>
+                                    </div>
+
+                                    <div className="flex justify-between md:justify-start gap-2">
+                                    <span>Status:</span>
+                                    <span>{item.status}</span>
+                                    </div>
+                                </div>
+
+                                {/* RIGHT SIDE */}
+                                <div className="flex flex-col md:items-end gap-2 text-sm md:text-base">
+                                    {item.maintenanceImg && (
+                                    <span
+                                        className="text-[color:var(--pink-color)] underline cursor-pointer"
+                                        onClick={() => setSelectedImage(item.maintenanceImg)}
+                                    >
+                                        View Receipt
+                                    </span>
+                                    )}
+
+                                    <span>{item.driverId}</span>
+                                    <span>{item.driverName}</span>
+                                </div>
+                                </div>
+
+                                {/* ACTION BUTTONS */}
+                                <div
+                                className="
+                                    flex flex-col sm:flex-row
+                                    gap-2
+                                    p-3 pt-0
+                                "
+                                >
+                                <span
+                                    className="
+                                    poppins bg-[var(--blue-color)]
+                                    text-sm text-[color:var(--light-color)]
+                                    px-3 py-2 rounded-md cursor-pointer
+                                    text-center w-full sm:w-auto
+                                    "
+                                    onClick={() => approveMaintenance(item.id)}
+                                >
+                                    Approve
+                                </span>
+
+                                <span
+                                    className="
+                                    poppins bg-[var(--red-color)]
+                                    text-sm text-[color:var(--light-color)]
+                                    px-3 py-2 rounded-md cursor-pointer
+                                    text-center w-full sm:w-auto
+                                    "
+                                    onClick={() => rejectMaintenance(item.id)}
+                                >
+                                    Reject
+                                </span>
+                                </div>
+                            </div>
+                            ))}
+                        </div>
+                    </div>}
 
                 </div>
 
@@ -476,8 +659,9 @@ function ReportsTab({isDark, activeTab }: ReportsTabProps) {
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div
-                                className="absolute top-[-10px] right-[-12px] h-9 w-9 bg-[var(--primary-color)] rounded-full
-                                    flex flex-col items-center justify-center"
+                                className={`${isMobile? "" : ""}
+                                    absolute top-[-10px] right-[-12px] h-9 w-9 bg-[var(--primary-color)] rounded-full
+                                    flex flex-col items-center justify-center`}
                                 onClick={() => setSelectedImage("")}
                             >
                                 <i className="bx bx-x text-[24px]" />
@@ -486,7 +670,7 @@ function ReportsTab({isDark, activeTab }: ReportsTabProps) {
                             <img
                                 src={selectedImage}
                                 alt="Receipt"
-                                className="max-h-[80vh] max-w-full "
+                                className={`${isMobile? "max-h-[80vh] max-w-[90vw]" : "max-h-[80vh] max-w-full"}`}
                             />
                         </div>
                     </div>
