@@ -2,7 +2,7 @@
 
 import { useIsMobile } from "@/app/home/hooks/useIsMobile"
 import { User } from "@/app/page"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { db } from "@/app/home/firebase/FirebaseConfig"
 import { doc, collection, getDocs, onSnapshot, setDoc, query, where, getDoc } from "firebase/firestore"
 import {
@@ -22,6 +22,7 @@ import {
     ResponsiveContainer,
     CartesianGrid,
 } from "recharts";
+import { useReactToPrint } from "react-to-print";
 
 import {
   Select,
@@ -50,6 +51,7 @@ export const AnalyticsTab = ({isDark, activeTab, totalDrivers, totalDelivered, a
     const [totalFuelCost, setTotalFuelCost] = useState(0);
     const [totalTrips, setTotalTrips] = useState(0);
     const [totalDistance, setTotalDistance] = useState(0);
+    const reportRef = useRef<HTMLDivElement>(null);
 
     const months = [
         "January", "February", "March", "April",
@@ -364,11 +366,17 @@ export const AnalyticsTab = ({isDark, activeTab, totalDrivers, totalDelivered, a
         fetchAnalytics();
     }, [user, hubId, selectedDocId]);
 
+    //generatePdf
+    const handlePrint = useReactToPrint({
+        contentRef: reportRef,
+        documentTitle: `analytics-${selectedYear}-${selectedMonth + 1}`,
+    });
+
     if (!mounted) return null;
 
     return (
         <>
-            {activeTab == "analytics" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
+            {activeTab == "analytics" && <div ref={reportRef} className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
                 ${isMobile? " overflow-y-auto hide-scrollbar" : "hide-scrollbar"}
                 h-full w-full flex flex-col items-start justify-start rounded-lg p-[calc(0.6vw+0.4rem)] gap-[calc(0.6vw+0.4rem)]`}>
                 
@@ -420,7 +428,7 @@ export const AnalyticsTab = ({isDark, activeTab, totalDrivers, totalDelivered, a
 
                         <span className="poppins bg-[var(--blue-color)] text-sm text-[color:var(--light-color)] px-[calc(0.6vw+0.4rem)] 
                             py-[calc(0.4vw+0.3rem)] cursor-pointer rounded-md max-w-[160px] text-center"
-                            >
+                            onClick={handlePrint}>
                             Generate report
                         </span>
                     </div>}
@@ -505,7 +513,7 @@ export const AnalyticsTab = ({isDark, activeTab, totalDrivers, totalDelivered, a
 
                         <span className="poppins bg-[var(--blue-color)] text-sm text-[color:var(--light-color)] px-[calc(0.6vw+0.4rem)] 
                             py-[calc(0.4vw+0.3rem)] cursor-pointer rounded-md max-w-[160px] text-center"
-                            >
+                            onClick={handlePrint}>
                             Generate report
                         </span>
                     </div>}

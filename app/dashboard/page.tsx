@@ -361,7 +361,7 @@ function page() {
 
   if(user?.uid) return (
     <div className={`${isDark ? "text-[var(--light-color)] bg-[var(--dashboard-primary)]" : "bg-[var(--dashboard-light)] text-[var(--dark-color)]"}
-        ${isMobile? "h-auto" : "h-screen"}
+        ${isMobile? "h-screen" : "h-screen"}
         flex flex-col items-start justify-start scroll-smooth p-[calc(0.6vw+0.4rem)]`}>
   
         {/* dashboard */}
@@ -434,8 +434,8 @@ function page() {
           </div>}
 
           {activeTab == "reports" && <div className={`${isDark? "bg-[var(--dashboard-dark)]" : "bg-[var(--dashboard-white)]"}
-            ${isMobile? "h-auto" : "h-full flex-1"}
-            w-full flex flex-col items-start justify-start rounded-lg`}>
+            ${isMobile? "h-auto" : "h-full flex-1 rounded-lg "}
+            w-full flex flex-col items-start justify-start overflow-y-scroll`}>
 
             <ReportsTab isDark={isDark} activeTab={activeTab} />
 
